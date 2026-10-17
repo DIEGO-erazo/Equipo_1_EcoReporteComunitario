@@ -1,10 +1,10 @@
-<<<<<<< HEAD
-
-# Entornos virtuales
+# Entorno virtual
 .venv/
 venv/
+env/
+ENV/
 
-# Python
+# Archivos Python
 __pycache__/
 *.py[cod]
 *.log
@@ -13,12 +13,15 @@ __pycache__/
 db.sqlite3
 db.sqlite3-journal
 
-# Variables y secretos
+# Variables de entorno y secretos
 .env
 .env.*
 
-# Editor
+# Editores
 .vscode/
 .idea/
 
-=======
+# Pruebas y archivos temporales
+.pytest_cache/
+.coverage
+htmlcov/
