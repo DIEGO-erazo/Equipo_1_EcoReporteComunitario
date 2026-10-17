@@ -3,91 +3,230 @@
 **Universidad Dr. Andrés Bello**  
 **Carrera:** Ingeniería en Sistemas y Computación  
 **Asignatura:** Programación Orientada a Objetos (POO)  
-**Proyecto de Proyección Social** | Ciclo 02-2026  
-**Ubicación:** Comunidad de San Rafael e Instituto Nacional de San Rafael, Distrito de San Rafael, Chalatenango  
+**Proyecto de Proyección Social — Ciclo 02-2026**  
+**Ubicación:** Comunidad de San Rafael e Instituto Nacional de San Rafael, distrito de San Rafael, Chalatenango, El Salvador.
 
----
+## 1. Descripción del proyecto
 
-## 📌 Descripción del Proyecto
-EcoReporte Comunitario es una plataforma web desarrollada con **Django** y **SQL Server** para registrar, organizar y dar seguimiento en tiempo real a problemáticas ambientales (botaderos clandestinos, acumulación de basura y fallas en la recolección) en la Comunidad de San Rafael. Funciona como un canal digital centralizado entre los habitantes, instituciones educativas y las autoridades municipales o gestores comunitarios.
+EcoReporte Comunitario es una aplicación web desarrollada con Python, Django y Microsoft SQL Server, orientada al registro y seguimiento de problemáticas ambientales en la comunidad de San Rafael.
 
----
+El proyecto busca facilitar la comunicación entre habitantes, instituciones educativas y responsables comunitarios mediante una plataforma para organizar información sobre botaderos clandestinos, acumulación de basura y problemas en la recolección de residuos.
 
-## 👥 Integrantes y Roles
+## 2. Objetivos
 
-| Nombre Completo | Carnet | Rol Principal | Responsabilidad / Enfoque |
-| :--- | :---: | :--- | :--- |
-| **Patrick Alejandro Alvarenga Cardoza** | ac0473032026 | Líder de Proyecto / Project Manager | Coordinación general, recolección de campo e instrumentos. |
-| **Jefersson Javier Galdámez Mejía** | gm1366032026 | Analista de Requerimientos | Definición de usuarios, matriz de permisos y Requisitos Funcionales. |
-| **Diego Fabricio Erazo Deras** | ed0921032026 | Líder Técnico / Administrador Git | Gestión del repositorio GitHub, tablero Kanban y arquitectura base. |
-| **Victor Angel Rivas Torres** | rt0234032026 | Diseñador UX/UI y Frontend | Requisitos No Funcionales, diseño responsive y adaptabilidad. |
-| **Geovany Enmanuel Alas Orellana** | ao0922032026 | Desarrollador Backend / QA | Redacción del diagnóstico, Fuentes Consultadas y maquetación de informes. |
+### Objetivo general
 
----
+Desarrollar una aplicación web que facilite el registro, consulta y seguimiento de problemas ambientales de la comunidad.
 
-## 👤 Tipos de Usuarios y Permisos
+### Objetivos específicos
 
-1. **Ciudadano / Reportante:**
-   - **Función:** Reportar problemas ambientales de la comunidad y darles seguimiento.
-   - **Permisos:** Registrarse, iniciar sesión, crear reportes con fotos, editar o eliminar reportes propios, consultar el catálogo público y filtrar casos.
-2. **Personal Municipal / Gestor:**
-   - **Función:** Atender reportes comunitarios y actualizar el avance de los casos.
-   - **Permisos:** Ver todos los reportes, cambiar estados (*Pendiente*, *En proceso*, *Resuelto*), agregar comentarios de avance y filtrar por zonas o categorías.
-3. **Administrador del Sistema:**
-   - **Función:** Moderar la plataforma, gestionar usuarios y supervisar estadísticas.
-   - **Permisos:** Control total del sistema, asignación de roles, moderación de contenidos y gestión de categorías.
+- Organizar la información de los reportes ambientales.
+- Establecer una estructura modular mediante Django.
+- Utilizar una base de datos relacional con SQL Server.
+- Aplicar conceptos de programación orientada a objetos.
+- Gestionar el código fuente mediante Git y GitHub.
 
----
+## 3. Integrantes y responsabilidades
 
-## 📋 Requisitos Funcionales (RF)
+| Integrante | Carnet | Rol |
+|---|---|---|
+| Patrick Alejandro Alvarenga Cardoza | ac0473032026 | Líder de proyecto |
+| Jefersson Javier Galdámez Mejía | gm1366032026 | Analista de requerimientos |
+| Diego Fabricio Erazo Deras | ed0921032026 | Líder técnico y administrador de Git |
+| Victor Angel Rivas Torres | rt0234032026 | Diseñador UX/UI y frontend |
+| Geovany Enmanuel Alas Orellana | ao0922032026 | Desarrollador backend y QA |
 
-| Código | Nombre | Descripción |
-| :---: | :--- | :--- |
-| **RF-01** | Registro de usuarios | Permite a los usuarios registrarse con nombre, correo electrónico y contraseña. |
-| **RF-02** | Autenticación | Permite iniciar y cerrar sesión adaptando la interfaz según el rol del usuario. |
-| **RF-03** | Registro de reportes | Permite crear reportes indicando título, descripción, categoría y ubicación del problema. |
-| **RF-04** | Consulta de reportes | Muestra el catálogo de reportes y el detalle completo de cada caso. |
-| **RF-05** | Modificación de reportes | Permite al autor editar sus reportes mientras no estén resueltos. |
-| **RF-06** | Eliminación de reportes | Permite al autor o al administrador eliminar publicaciones. |
-| **RF-07** | Evidencias fotográficas | Permite adjuntar imágenes (.jpg, .jpeg, .png) al reporte. |
-| **RF-08** | Búsqueda y filtrado | Búsqueda por palabras clave y filtros por categoría, estado y fecha. |
-| **RF-09** | Actualización de estado | Permite al personal municipal cambiar el estado del reporte (*Pendiente*, *En proceso*, *Resuelto*). |
-| **RF-10** | Seguimiento de avances | Muestra el historial de cambios de estado y comentarios oficiales. |
-| **RF-11** | Gestión de usuarios y roles | Permite al administrador gestionar cuentas y asignar permisos. |
+## 4. Tecnologías utilizadas
 
----
+- Python
+- Django
+- Microsoft SQL Server
+- `mssql-django`
+- ODBC Driver 18 for SQL Server
+- Git y GitHub
+- Visual Studio Code
 
-## ⚙️ Requisitos No Funcionales (RNF)
+## 5. Estructura del repositorio
 
-| Código | Categoría | Descripción |
-| :---: | :--- | :--- |
-| **RNF-01** | Adaptabilidad y Usabilidad | Interfaz responsive adaptada a móviles, tabletas y computadoras con Bootstrap. |
-| **RNF-02** | Arquitectura Tecnológica | Backend en Django (MVT) con base de datos relacional SQL Server. |
-| **RNF-03** | Integridad de Datos | Validación de formularios en cliente y servidor junto a restricciones de archivos. |
-| **RNF-04** | Seguridad y Privacidad | Cifrado de contraseñas (PBKDF2), protección CSRF y control de acceso basado en roles (RBAC). |
-| **RNF-05** | Rendimiento | Carga de vistas principales en un tiempo medio no mayor a 3 segundos. |
+El repositorio contiene la configuración principal de Django, la aplicación de reportes y archivos de documentación del proyecto.
 
----
+```text
+Equipo_1_EcoReporteComunitario/
+├── config/
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+├── reportes/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── tests.py
+│   └── migrations/
+├── ecoreporte_app/
+├── ecoreporte_project/
+├── docs/
+├── documentacion/
+├── manage.py
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
 
-## 🛠️ Especificaciones Técnicas y Arquitectura
-* **Backend Framework:** Python / Django (Patrón MVT).
-* **Base de Datos:** SQL Server (Conexión mediante `mssql-django` / ODBC).
-* **Frontend:** HTML5, CSS3, JavaScript, Bootstrap 5.
-* **Control de Versiones & Gestión:** Git, GitHub, Tablero Kanban.
-* **Seguridad:** Tokens CSRF, Hashing PBKDF2 / SHA256 y anonimización opcional de datos de contacto.
+### Archivos principales
 
----
+- `manage.py`: punto de entrada para ejecutar comandos de Django.
+- `config/settings.py`: configuración general del proyecto y de la base de datos.
+- `config/urls.py`: configuración de rutas.
+- `reportes/`: aplicación destinada a las funcionalidades relacionadas con los reportes ambientales.
+- `reportes/models.py`: contiene la clase Python `ReporteAmbiental`.
+- `requirements.txt`: lista de dependencias de Python.
+- `.gitignore`: define archivos y carpetas excluidos del control de versiones.
+- `README.md`: documentación general del proyecto.
 
-## 📚 Fuentes Confiables Consultadas
+## 6. Requisitos de instalación
 
-1. **Ministerio de Medio Ambiente y Recursos Naturales (MARN) - El Salvador (2022):** *Diagnóstico Nacional de Residuos*. Sustenta la urgencia de erradicar botaderos clandestinos y mejorar el control local.
-2. **Fundación Empresarial para la Acción Social (FUNDEMAS) (2024/2025):** *Guía para alcaldías sobre la gestión integral de residuos con énfasis en reciclaje*. Confirma que los canales digitales de reporte ciudadano disminuyen riesgos sanitarios.
+Para ejecutar el proyecto se requiere:
 
----
----
+- Python instalado.
+- Git instalado.
+- Microsoft SQL Server disponible.
+- ODBC Driver 18 for SQL Server.
+- Acceso a la base de datos `EcoReporteDB`.
 
-## 📂 Estado del Proyecto
-* **Semana 1:** [✓] Organización del equipo y selección de la problemática ambiental.
-* **Semana 2:** [✓] Diagnóstico de campo en San Rafael, levantamiento de encuestas y registros fotográficos[cite: 11].
-* **Semana 3:** [✓] Documentación del README.md en GitHub, matriz de perfiles de usuario, 11 Requisitos Funcionales, 5 No Funcionales y fuentes oficiales.
-* **Semana 4 (Próxima):** [ ] Configuración del entorno Django, conexión con SQL Server y creación de los modelos en `models.py`.
+## 7. Instalación y ejecución
+
+### 7.1. Clonar el repositorio
+
+```powershell
+git clone https://github.com/DIEGO-erazo/Equipo_1_EcoReporteComunitario.git
+cd Equipo_1_EcoReporteComunitario
+```
+
+### 7.2. Crear y activar el entorno virtual
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+### 7.3. Instalar las dependencias
+
+```powershell
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 7.4. Configurar la base de datos
+
+En `config/settings.py`, Django utiliza el motor `mssql` y la base de datos `EcoReporteDB`. La configuración local emplea autenticación integrada de Windows y el controlador ODBC Driver 18 for SQL Server.
+
+El servidor y las credenciales de conexión deben corresponder al entorno donde se ejecuta la aplicación. No se deben incluir contraseñas ni claves secretas en el repositorio.
+
+### 7.5. Verificar la configuración de Django
+
+```powershell
+python manage.py check
+```
+
+### 7.6. Comprobar la conexión con SQL Server
+
+```powershell
+python manage.py shell -c "from django.db import connection; connection.ensure_connection(); print('CONEXION EXITOSA'); print(connection.vendor); print(connection.settings_dict['NAME'])"
+```
+
+### 7.7. Ejecutar las migraciones
+
+```powershell
+python manage.py migrate
+```
+
+### 7.8. Iniciar el servidor de desarrollo
+
+```powershell
+python manage.py runserver
+```
+
+La aplicación se puede consultar localmente en:
+
+http://127.0.0.1:8000/
+
+## 8. Programación orientada a objetos
+
+El proyecto incorpora una clase Python denominada `ReporteAmbiental`, ubicada en `reportes/models.py`.
+
+La clase define los siguientes atributos:
+
+- `titulo`: título del reporte.
+- `descripcion`: descripción del problema.
+- `ubicacion`: lugar donde se presenta.
+- `tipo`: categoría o tipo de problema.
+- `estado`: estado inicial del reporte, establecido como `Pendiente`.
+
+También contiene los métodos:
+
+- `mostrar_informacion()`: devuelve una descripción del reporte.
+- `cambiar_estado(nuevo_estado)`: actualiza el estado del objeto.
+
+Esta clase representa la estructura inicial de un reporte ambiental mediante atributos y métodos de Python.
+
+## 9. Base de datos
+
+La base de datos utilizada por la configuración local se denomina `EcoReporteDB` y corresponde a Microsoft SQL Server.
+
+Django se conecta mediante `mssql-django` y ODBC Driver 18 for SQL Server. La conexión fue comprobada desde la consola de Django.
+
+La definición de modelos persistentes, sus relaciones y las migraciones correspondientes forman parte de la evolución de la estructura de datos de la aplicación.
+
+## 10. Funcionalidades contempladas
+
+De acuerdo con los requerimientos definidos para el proyecto, la plataforma está orientada a incorporar:
+
+- Registro y autenticación de usuarios.
+- Creación y consulta de reportes ambientales.
+- Clasificación de reportes por categoría.
+- Incorporación de evidencias fotográficas.
+- Búsqueda y filtrado de reportes.
+- Actualización del estado y seguimiento de los casos.
+- Gestión de usuarios, roles y permisos.
+
+Estas funcionalidades corresponden al alcance definido en los requisitos del proyecto; su disponibilidad depende de la implementación de cada componente.
+
+## 11. Control de versiones
+
+El código fuente se almacena en GitHub y se administra mediante Git para registrar los cambios realizados durante el desarrollo.
+
+**Repositorio oficial:**  
+https://github.com/DIEGO-erazo/Equipo_1_EcoReporteComunitario
+
+Comandos básicos para registrar y enviar cambios:
+
+```powershell
+git status
+git add .
+git commit -m "Descripción de los cambios"
+git push
+```
+
+## 12. Seguridad
+
+La configuración de desarrollo no debe utilizarse directamente en producción. Las claves secretas y credenciales deben mantenerse fuera del repositorio y gestionarse mediante variables de entorno o mecanismos de configuración seguros.
+
+El archivo `.gitignore` debe excluir el entorno virtual, archivos temporales, bases de datos locales y archivos que contengan información sensible.
+
+## 13. Estado del proyecto
+
+El proyecto cuenta con una estructura inicial de Django, una aplicación destinada a los reportes ambientales, una página de inicio funcional y una configuración de conexión con SQL Server.
+
+El desarrollo continuará con la definición de modelos de datos, migraciones, formularios, operaciones CRUD y las funcionalidades descritas en los requerimientos.
+
+## 14. Información académica
+
+**Institución:** Universidad Dr. Andrés Bello  
+**Carrera:** Ingeniería en Sistemas y Computación  
+**Asignatura:** Programación Orientada a Objetos  
+**Proyecto:** EcoReporte Comunitario  
+**Ciclo:** 02-2026  
+**Equipo:** N.º 1
