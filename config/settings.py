@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Aplicaciones del proyecto EcoReporte Comunitario:
+    'usuarios',
     'reportes',
 ]
 
@@ -77,10 +79,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'EcoReporteDB',
-        'HOST': 'localhost',
+        'HOST': 'localhost',  
+        'PORT': '',          
         'OPTIONS': {
             'driver': 'ODBC Driver 18 for SQL Server',
-            'extra_params': 'Trusted_Connection=yes;Encrypt=yes;TrustServerCertificate=yes;',
+            'trusted_connection': 'yes',
+            'extra_params': 'TrustServerCertificate=yes;',
         },
     },
 }
