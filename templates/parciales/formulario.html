@@ -1,0 +1,4 @@
+{% if form.non_field_errors %}
+  <div class="mensaje mensaje-error">{% for error in form.non_field_errors %}{{ error }} {% endfor %}</div>
+{% endif %}
+{% for campo in form %}{% include "parciales/campo.html" %}{% endfor %}

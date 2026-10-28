@@ -1,0 +1,51 @@
+# Levanta todos los servicios de EcoReporte Comunitario:
+#   - db:  Microsoft SQL Server 2022 (base de datos EcoReporteDB)
+#   - web: la aplicación Django
+# Uso:  docker compose up --build   y abrir http://localhost:8000
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD:-EcoReporte#2026}"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_datos:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  web:
+    build: .
+    environment:
+      DEBUG: "False"
+      SECURE_COOKIES: "False"
+      SECRET_KEY: "${SECRET_KEY:-cambia-esta-clave-en-produccion}"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,0.0.0.0"
+      CSRF_TRUSTED_ORIGINS: "http://localhost:8000,http://127.0.0.1:8000"
+      DB_ENGINE: mssql
+      DB_NAME: EcoReporteDB
+      DB_HOST: db
+      DB_PORT: "1433"
+      DB_USER: sa
+      DB_PYTHON_DRIVER: mssql_python
+      DB_PASSWORD: "${DB_PASSWORD:-EcoReporte#2026}"
+      CARGAR_DEMO: "${CARGAR_DEMO:-1}"
+      MEDIA_ROOT: /app/media
+    ports:
+      - "8000:8000"
+    volumes:
+      - fotos_evidencias:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  sqlserver_datos:
+  fotos_evidencias:

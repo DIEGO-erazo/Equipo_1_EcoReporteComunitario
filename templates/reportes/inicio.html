@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio{% endblock %}
+{% block contenido %}
+<section class="portada">
+  <div>
+    <h1>Juntos por una San Rafael más limpia</h1>
+    <p>Reporta botaderos clandestinos, acumulación de basura y problemas con la recolección de residuos.
+       Da seguimiento a cada caso hasta que se resuelva.</p>
+    <div class="acciones">
+      <a class="boton" href="{% url 'reportes:crear' %}">Hacer un reporte</a>
+      <a class="boton boton-secundario" href="{% url 'reportes:lista' %}">Ver reportes</a>
+    </div>
+  </div>
+</section>
+
+<section class="estadisticas">
+  <div class="estadistica"><span class="numero">{{ total_reportes }}</span><span>Reportes</span></div>
+  <div class="estadistica estado-pendiente"><span class="numero">{{ total_pendientes }}</span><span>Pendientes</span></div>
+  <div class="estadistica estado-proceso"><span class="numero">{{ total_en_proceso }}</span><span>En proceso</span></div>
+  <div class="estadistica estado-resuelto"><span class="numero">{{ total_resueltos }}</span><span>Resueltos</span></div>
+</section>
+
+<section>
+  <div class="encabezado-seccion">
+    <h2>Reportes recientes</h2>
+    <a href="{% url 'reportes:lista' %}">Ver todos →</a>
+  </div>
+  {% if recientes %}
+    <div class="rejilla">{% for reporte in recientes %}{% include "parciales/tarjeta_reporte.html" %}{% endfor %}</div>
+  {% else %}
+    <p class="vacio">Aún no hay reportes. ¡Sé la primera persona en reportar un problema!</p>
+  {% endif %}
+</section>
+
+<section class="pasos">
+  <h2>¿Cómo funciona?</h2>
+  <ol>
+    <li><strong>Crea tu cuenta</strong> con tu correo.</li>
+    <li><strong>Reporta</strong> el problema con una descripción, el lugar y fotos.</li>
+    <li><strong>Da seguimiento</strong>: los responsables actualizan el estado del caso.</li>
+  </ol>
+</section>
+{% endblock %}

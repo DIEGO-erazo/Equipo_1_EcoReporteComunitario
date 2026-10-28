@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Mis reportes{% endblock %}
+{% block contenido %}
+<div class="encabezado-seccion">
+  <h1>Mis reportes</h1>
+  <a class="boton" href="{% url 'reportes:crear' %}">+ Nuevo reporte</a>
+</div>
+{% if pagina.object_list %}
+  <div class="rejilla">{% for reporte in pagina %}{% include "parciales/tarjeta_reporte.html" %}{% endfor %}</div>
+  {% include "parciales/paginacion.html" %}
+{% else %}
+  <p class="vacio">Todavía no has hecho reportes. <a href="{% url 'reportes:crear' %}">Crea el primero</a>.</p>
+{% endif %}
+{% endblock %}

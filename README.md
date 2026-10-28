@@ -38,163 +38,171 @@ Desarrollar una aplicación web que facilite el registro, consulta y seguimiento
 
 ## 4. Tecnologías utilizadas
 
-- Python
-- Django
-- Microsoft SQL Server
-- `mssql-django`
-- ODBC Driver 18 for SQL Server
-- Git y GitHub
-- Visual Studio Code
+- Python 3.12 o superior
+- Django 6.1
+- Microsoft SQL Server (también funciona con SQLite para pruebas rápidas)
+- `mssql-django` y `mssql-python` (este último ya incluye el ODBC Driver 18)
+- Docker y Docker Compose (opcional, para levantar todos los servicios con un solo comando)
+- Git y GitHub (con pruebas automáticas en GitHub Actions)
 
 ## 5. Estructura del repositorio
 
-El repositorio contiene la configuración principal de Django, la aplicación de reportes y archivos de documentación del proyecto.
-
 ```text
 Equipo_1_EcoReporteComunitario/
-├── config/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-├── reportes/
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── tests.py
-│   └── migrations/
-├── ecoreporte_app/
-├── ecoreporte_project/
-├── docs/
-├── documentacion/
+├── config/                  # Configuración de Django (settings, urls, wsgi)
+├── usuarios/                # Registro, inicio de sesión, perfil y roles
+├── reportes/                # Reportes, categorías, estados, evidencias y seguimiento
+│   └── management/commands/cargar_datos_iniciales.py
+├── templates/               # Páginas HTML
+├── static/                  # Estilos (CSS) e imágenes
+├── docker/                  # Scripts usados por el contenedor
+├── documentacion/           # Documentos de las tareas del curso
+├── Dockerfile
+├── docker-compose.yml       # SQL Server + aplicación web
+├── iniciar.bat / iniciar.sh # Instalación y arranque en un solo paso
+├── .env.example             # Plantilla de configuración
 ├── manage.py
-├── requirements.txt
-├── .gitignore
-└── README.md
+└── requirements.txt
 ```
 
-### Archivos principales
+## 6. Funcionalidades
 
-- `manage.py`: punto de entrada para ejecutar comandos de Django.
-- `config/settings.py`: configuración general del proyecto y de la base de datos.
-- `config/urls.py`: configuración de rutas.
-- `reportes/`: aplicación destinada a las funcionalidades relacionadas con los reportes ambientales.
-- `reportes/models.py`: contiene la clase Python `ReporteAmbiental`.
-- `requirements.txt`: lista de dependencias de Python.
-- `.gitignore`: define archivos y carpetas excluidos del control de versiones.
-- `README.md`: documentación general del proyecto.
+- **Cuentas de usuario:** registro con correo, inicio y cierre de sesión, edición del perfil y cambio de contraseña.
+- **Reportes ambientales:** crear, ver, editar y eliminar reportes con título, categoría, descripción, ubicación y coordenadas opcionales (con enlace al mapa).
+- **Evidencias fotográficas:** se pueden subir varias fotos por reporte (máximo 5 MB cada una).
+- **Búsqueda y filtros:** por texto, categoría y estado, con paginación.
+- **Seguimiento:** los administradores cambian el estado (Pendiente, En proceso, Resuelto, Rechazado) con un comentario; cada cambio queda en el historial del reporte.
+- **Roles y permisos:** cada ciudadano solo puede editar sus propios reportes; los administradores pueden gestionar todos.
+- **Inicio con estadísticas** y panel de administración de Django en `/admin/`.
+- Diseño adaptable a teléfonos.
 
-## 6. Requisitos de instalación
+## 7. Cómo ejecutar el proyecto
 
-Para ejecutar el proyecto se requiere:
+Hay tres formas. La más sencilla es la **opción A**.
 
-- Python instalado.
-- Git instalado.
-- Microsoft SQL Server disponible.
-- ODBC Driver 18 for SQL Server.
-- Acceso a la base de datos `EcoReporteDB`.
+### Opción A: un solo paso (Windows, macOS o Linux)
 
-## 7. Instalación y ejecución
-
-### 7.1. Clonar el repositorio
+Requisitos: [Python](https://www.python.org/downloads/) 3.12 o superior (en Windows, marca "Add Python to PATH" al instalarlo).
 
 ```powershell
 git clone https://github.com/DIEGO-erazo/Equipo_1_EcoReporteComunitario.git
 cd Equipo_1_EcoReporteComunitario
 ```
 
-### 7.2. Crear y activar el entorno virtual
+- **Windows:** doble clic en `iniciar.bat` (o ejecuta `.\iniciar.bat` en la terminal).
+- **macOS / Linux:** `./iniciar.sh`
+
+El script crea el entorno virtual, instala las dependencias, prepara la base de datos (SQLite por defecto), carga datos de ejemplo e inicia el servidor. Luego abre http://127.0.0.1:8000.
+
+### Opción B: con Docker (todos los servicios: SQL Server + aplicación)
+
+Requisitos: [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+```powershell
+docker compose up --build
+```
+
+Esto levanta **SQL Server 2022**, crea la base de datos `EcoReporteDB`, aplica las migraciones, carga los datos iniciales y de ejemplo, e inicia la aplicación en http://localhost:8000. Para detenerlo: `Ctrl+C` o `docker compose down`. Los datos se conservan entre ejecuciones; para borrarlos usa `docker compose down -v`.
+
+SQL Server queda disponible en `localhost,1433` (usuario `sa`, contraseña `EcoReporte#2026`) para consultarlo con SQL Server Management Studio o Azure Data Studio.
+
+### Opción C: paso a paso con SQL Server local
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-```
-
-### 7.3. Instalar las dependencias
-
-```powershell
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+copy .env.example .env
 ```
 
-### 7.4. Configurar la base de datos
-
-En `config/settings.py`, Django utiliza el motor `mssql` y la base de datos `EcoReporteDB`. La configuración local emplea autenticación integrada de Windows y el controlador ODBC Driver 18 for SQL Server.
-
-El servidor y las credenciales de conexión deben corresponder al entorno donde se ejecuta la aplicación. No se deben incluir contraseñas ni claves secretas en el repositorio.
-
-### 7.5. Verificar la configuración de Django
-
-```powershell
-python manage.py check
-```
-
-### 7.6. Comprobar la conexión con SQL Server
-
-```powershell
-python manage.py shell -c "from django.db import connection; connection.ensure_connection(); print('CONEXION EXITOSA'); print(connection.vendor); print(connection.settings_dict['NAME'])"
-```
-
-### 7.7. Ejecutar las migraciones
+Edita `.env`: cambia a `DB_ENGINE=mssql` y descomenta las líneas de SQL Server. Si dejas `DB_USER` vacío se usa la autenticación integrada de Windows, igual que en la configuración anterior del proyecto. La base `EcoReporteDB` debe existir en el servidor.
 
 ```powershell
 python manage.py migrate
-```
-
-### 7.8. Iniciar el servidor de desarrollo
-
-```powershell
+python manage.py cargar_datos_iniciales          # roles, estados y categorías
+python manage.py cargar_datos_iniciales --demo   # (opcional) usuarios y reportes de ejemplo
+python manage.py createsuperuser                 # (opcional) tu propia cuenta de administrador
 python manage.py runserver
 ```
 
-La aplicación se puede consultar localmente en:
+### Cuentas de ejemplo
 
-http://127.0.0.1:8000/
+Se crean con `--demo` (y automáticamente con las opciones A y B):
+
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Administrador | admin@ecoreporte.local | admin12345 |
+| Ciudadana | vecina@ecoreporte.local | vecina12345 |
+
+> Cambia o elimina estas cuentas antes de usar la aplicación con datos reales.
+
+### Iniciar sesión con Google, GitHub o Microsoft
+
+Es opcional. Cada botón aparece al poner las credenciales de su proveedor en el `.env`.
+Los pasos para obtenerlas están en [documentacion/inicio_sesion_social.md](documentacion/inicio_sesion_social.md).
+
+### Opción D: publicarla en internet desde una computadora con Ubuntu
+
+Convierte una laptop (por ejemplo, una de las entregadas por el gobierno) en el servidor de la página.
+Usa SQLite, gunicorn y **Cloudflare Tunnel**, que da una dirección `https://` pública gratis sin
+configurar el router. En la laptop:
+
+```bash
+git clone https://github.com/DIEGO-erazo/Equipo_1_EcoReporteComunitario.git
+cd Equipo_1_EcoReporteComunitario
+bash servidor/instalar_servidor.sh   # instala todo; pide crear la cuenta de administrador
+bash servidor/ver_direccion.sh       # muestra la dirección pública actual
+journalctl -u ecoreporte-actualizar -n 50   # historial de actualizaciones automáticas
+```
+
+Cada 2 minutos la laptop revisa la rama `main` en GitHub. Cuando hay un commit nuevo **y pasó las
+pruebas de GitHub Actions**, lo descarga, aplica las migraciones y recarga la app sin cortar las
+visitas; si las pruebas fallan, no se instala. Si algo falla durante la actualización, regresa sola
+a la versión anterior. `bash servidor/actualizar.sh` hace una actualización manual inmediata.
+
+La app y el túnel arrancan solos al encender la laptop, que sigue funcionando con la tapa cerrada.
+Cada día se guarda un respaldo de la base de datos y las fotos en `~/respaldos_ecoreporte`.
+La dirección gratuita (`*.trycloudflare.com`) cambia cada vez que se reinicia la laptop; para una fija
+hay que registrar un dominio propio en Cloudflare.
+
+### Ejecutar las pruebas
+
+```powershell
+python manage.py test
+```
+
+Las pruebas se ejecutan automáticamente en GitHub Actions con SQLite y con SQL Server en cada `push`.
 
 ## 8. Programación orientada a objetos
 
-El proyecto incorpora una clase Python denominada `ReporteAmbiental`, ubicada en `reportes/models.py`.
+Los modelos de Django son clases de Python que representan las tablas de la base de datos. La clase `ReporteAmbiental` (`reportes/models.py`) incluye, además de sus atributos, los métodos:
 
-La clase define los siguientes atributos:
+- `mostrar_informacion()`: devuelve un resumen legible del reporte.
+- `cambiar_estado(nuevo_estado, responsable, comentario)`: cambia el estado y registra el cambio en la tabla de seguimiento, todo en una sola transacción.
+- `puede_editar(perfil)`: indica si un usuario puede modificar el reporte.
 
-- `titulo`: título del reporte.
-- `descripcion`: descripción del problema.
-- `ubicacion`: lugar donde se presenta.
-- `tipo`: categoría o tipo de problema.
-- `estado`: estado inicial del reporte, establecido como `Pendiente`.
-
-También contiene los métodos:
-
-- `mostrar_informacion()`: devuelve una descripción del reporte.
-- `cambiar_estado(nuevo_estado)`: actualiza el estado del objeto.
-
-Esta clase representa la estructura inicial de un reporte ambiental mediante atributos y métodos de Python.
+Otros ejemplos de POO en el proyecto: la clase `Usuario` con las propiedades `nombre_completo` y `es_administrador`, el método de clase `Estado.inicial()`, la herencia en los formularios (`RegistroForm` hereda de `UserCreationForm`) y en el comando `cargar_datos_iniciales` (hereda de `BaseCommand`).
 
 ## 9. Base de datos
 
-La base de datos utilizada por la configuración local se denomina `EcoReporteDB` y corresponde a Microsoft SQL Server.
+Tablas principales (los nombres coinciden con el diseño del proyecto):
 
-Django se conecta mediante `mssql-django` y ODBC Driver 18 for SQL Server. La conexión fue comprobada desde la consola de Django.
+| Tabla | Contenido |
+|---|---|
+| `roles` | Ciudadano, Administrador |
+| `usuarios` | Perfil de cada persona; se enlaza con la cuenta de acceso de Django (`auth_user`) |
+| `categorias` | Botadero clandestino, Acumulación de basura, Recolección de residuos, etc. |
+| `estados` | Pendiente, En proceso, Resuelto, Rechazado |
+| `reportes` | Reportes ambientales |
+| `evidencias` | Fotos de cada reporte (la imagen se guarda en la carpeta `media/`) |
+| `seguimiento_reporte` | Historial de cambios de estado |
 
-La definición de modelos persistentes, sus relaciones y las migraciones correspondientes forman parte de la evolución de la estructura de datos de la aplicación.
+Las contraseñas las cifra el sistema de autenticación de Django en `auth_user`. La columna `contrasena_hash` de `usuarios` se conserva por compatibilidad, pero ya no se usa.
 
-## 10. Funcionalidades contempladas
+**Si ya tenían la base de datos creada:** basta con ejecutar `python manage.py migrate`; las nuevas migraciones agregan la columna `cuenta_id` sin borrar datos. Los usuarios creados antes no tienen contraseña de Django: se pueden enlazar a una cuenta desde `/admin/` o registrarse de nuevo.
 
-De acuerdo con los requerimientos definidos para el proyecto, la plataforma está orientada a incorporar:
-
-- Registro y autenticación de usuarios.
-- Creación y consulta de reportes ambientales.
-- Clasificación de reportes por categoría.
-- Incorporación de evidencias fotográficas.
-- Búsqueda y filtrado de reportes.
-- Actualización del estado y seguimiento de los casos.
-- Gestión de usuarios, roles y permisos.
-
-Estas funcionalidades corresponden al alcance definido en los requisitos del proyecto; su disponibilidad depende de la implementación de cada componente.
-
-## 11. Control de versiones
+## 10. Control de versiones
 
 El código fuente se almacena en GitHub y se administra mediante Git para registrar los cambios realizados durante el desarrollo.
 
@@ -210,19 +218,19 @@ git commit -m "Descripción de los cambios"
 git push
 ```
 
-## 12. Seguridad
+## 11. Seguridad
 
-La configuración de desarrollo no debe utilizarse directamente en producción. Las claves secretas y credenciales deben mantenerse fuera del repositorio y gestionarse mediante variables de entorno o mecanismos de configuración seguros.
+La configuración se lee del archivo `.env` (excluido de Git) o de variables de entorno, por lo que las claves y contraseñas no se guardan en el repositorio. Antes de publicar la aplicación se debe definir un `SECRET_KEY` propio, usar `DEBUG=False` y cambiar la contraseña de SQL Server y de las cuentas de ejemplo.
 
 El archivo `.gitignore` debe excluir el entorno virtual, archivos temporales, bases de datos locales y archivos que contengan información sensible.
 
-## 13. Estado del proyecto
+## 12. Estado del proyecto
 
-El proyecto cuenta con una estructura inicial de Django, una aplicación destinada a los reportes ambientales, una página de inicio funcional y una configuración de conexión con SQL Server.
+La aplicación es funcional: registro e inicio de sesión, gestión completa de reportes con fotos, búsqueda y filtros, seguimiento de estados por parte de los administradores y panel de administración, con pruebas automáticas.
 
-El desarrollo continuará con la definición de modelos de datos, migraciones, formularios, operaciones CRUD y las funcionalidades descritas en los requerimientos.
+Posibles mejoras futuras: mapa interactivo de reportes, notificaciones por correo al cambiar el estado y exportación de reportes a Excel o PDF.
 
-## 14. Información académica
+## 13. Información académica
 
 **Institución:** Universidad Dr. Andrés Bello  
 **Carrera:** Ingeniería en Sistemas y Computación  

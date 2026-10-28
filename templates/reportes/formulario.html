@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo_pagina }}{% endblock %}
+{% block contenido %}
+<div class="panel formulario-ancho">
+  <h1>{{ titulo_pagina }}</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% include "parciales/formulario.html" %}
+    <div class="acciones">
+      <button type="submit" class="boton">Guardar</button>
+      <a class="boton boton-secundario" href="{% if reporte %}{{ reporte.get_absolute_url }}{% else %}{% url 'reportes:lista' %}{% endif %}">Cancelar</a>
+    </div>
+  </form>
+
+  {% if reporte and reporte.evidencias.exists %}
+    <h2>Fotos actuales</h2>
+    <div class="galeria">
+      {% for evidencia in reporte.evidencias.all %}
+        <figure>
+          <img src="{{ evidencia.url_imagen.url }}" alt="Evidencia {{ forloop.counter }}">
+          <form method="post" action="{% url 'reportes:eliminar_evidencia' evidencia.pk %}">
+            {% csrf_token %}<button type="submit" class="enlace peligro">Quitar foto</button>
+          </form>
+        </figure>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

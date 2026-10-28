@@ -1,0 +1,55 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block titulo %}EcoReporte Comunitario{% endblock %} · EcoReporte</title>
+  <link rel="icon" href="{% static 'img/hoja.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+</head>
+<body>
+  <header class="barra">
+    <div class="contenedor barra-interna">
+      <a class="marca" href="{% url 'inicio' %}">
+        <img src="{% static 'img/hoja.svg' %}" alt="" width="28" height="28">
+        <span>EcoReporte <small>Comunitario</small></span>
+      </a>
+      <input type="checkbox" id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
+      <label for="menu-toggle" class="menu-boton" aria-hidden="true">☰</label>
+      <nav class="menu">
+        <a href="{% url 'reportes:lista' %}">Reportes</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'reportes:mis_reportes' %}">Mis reportes</a>
+          {% if perfil.es_administrador %}<a href="{% url 'admin:index' %}">Administración</a>{% endif %}
+          <a href="{% url 'usuarios:perfil' %}">{{ perfil.nombre }}</a>
+          <form method="post" action="{% url 'logout' %}" class="en-linea">{% csrf_token %}
+            <button type="submit" class="enlace">Salir</button>
+          </form>
+          <a class="boton boton-claro" href="{% url 'reportes:crear' %}">+ Reportar</a>
+        {% else %}
+          <a href="{% url 'login' %}">Ingresar</a>
+          <a class="boton boton-claro" href="{% url 'usuarios:registro' %}">Crear cuenta</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="contenedor contenido">
+    {% if messages %}
+      <div class="mensajes">
+        {% for message in messages %}
+          <div class="mensaje mensaje-{{ message.tags }}" role="status">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block contenido %}{% endblock %}
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor">
+      <p><strong>EcoReporte Comunitario</strong> · San Rafael, Chalatenango, El Salvador</p>
+      <p>Proyecto de Proyección Social · Universidad Dr. Andrés Bello · Ciclo 02-2026 · Equipo 1</p>
+    </div>
+  </footer>
+</body>
+</html>

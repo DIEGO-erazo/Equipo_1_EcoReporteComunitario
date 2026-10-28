@@ -1,0 +1,13 @@
+{% load socialaccount %}
+{% get_providers as proveedores %}
+{% if proveedores %}
+  <div class="botones-sociales">
+    {% for proveedor in proveedores %}
+      <form method="post" action="{% provider_login_url proveedor.id next=next %}">
+        {% csrf_token %}
+        <button type="submit" class="boton boton-social boton-{{ proveedor.id }}">Continuar con {{ proveedor.name }}</button>
+      </form>
+    {% endfor %}
+  </div>
+  <p class="separador"><span>o con tu correo</span></p>
+{% endif %}

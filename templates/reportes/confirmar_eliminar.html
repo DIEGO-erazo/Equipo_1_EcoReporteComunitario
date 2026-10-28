@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Eliminar reporte{% endblock %}
+{% block contenido %}
+<div class="panel formulario-angosto">
+  <h1>¿Eliminar este reporte?</h1>
+  <p>Se eliminará <strong>«{{ reporte.titulo }}»</strong> junto con sus fotos y su historial. Esta acción no se puede deshacer.</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="acciones">
+      <button type="submit" class="boton boton-peligro">Sí, eliminar</button>
+      <a class="boton boton-secundario" href="{{ reporte.get_absolute_url }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

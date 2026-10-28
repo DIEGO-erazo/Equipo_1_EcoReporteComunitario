@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Mi perfil{% endblock %}
+{% block contenido %}
+<div class="detalle">
+  <div class="panel">
+    <h1>Mi perfil</h1>
+    <p class="meta">{{ perfil.correo }} · Rol: {{ perfil.id_rol }} · Miembro desde {{ perfil.fecha_registro|date:"F Y" }}</p>
+    <form method="post">
+      {% csrf_token %}
+      {% include "parciales/formulario.html" %}
+      <div class="acciones">
+        <button type="submit" class="boton">Guardar cambios</button>
+        {% if user.has_usable_password %}
+          <a class="boton boton-secundario" href="{% url 'usuarios:cambiar_contrasena' %}">Cambiar contraseña</a>
+        {% else %}
+          {# Quien entró con Google, GitHub o Microsoft no tiene contraseña; puede crear una. #}
+          <a class="boton boton-secundario" href="{% url 'account_set_password' %}">Crear contraseña</a>
+        {% endif %}
+        <a class="boton boton-secundario" href="{% url 'socialaccount_connections' %}">Cuentas conectadas</a>
+      </div>
+    </form>
+  </div>
+  <aside class="panel">
+    <h2>Mis reportes ({{ mis_reportes|length }})</h2>
+    {% if mis_reportes %}
+      <ul class="lista-simple">
+        {% for r in mis_reportes|slice:":8" %}
+          <li><a href="{{ r.get_absolute_url }}">{{ r.titulo }}</a> <span class="etiqueta estado-{{ r.id_estado.clase_css }}">{{ r.id_estado }}</span></li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'reportes:mis_reportes' %}">Ver todos →</a>
+    {% else %}
+      <p class="vacio">Aún no has hecho reportes.</p>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

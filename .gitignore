@@ -16,6 +16,7 @@ db.sqlite3-journal
 # Variables de entorno y secretos
 .env
 .env.*
+!.env.example
 
 # Editores
 .vscode/
@@ -25,3 +26,7 @@ db.sqlite3-journal
 .pytest_cache/
 .coverage
 htmlcov/  
+
+# Archivos generados por Django
+media/
+staticfiles/

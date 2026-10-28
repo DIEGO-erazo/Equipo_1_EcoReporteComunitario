@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Crear cuenta{% endblock %}
+{% block contenido %}
+<div class="panel formulario-angosto">
+  <h1>Crear cuenta</h1>
+  {% include "parciales/botones_sociales.html" %}
+  <form method="post">
+    {% csrf_token %}
+    {% include "parciales/formulario.html" %}
+    <button type="submit" class="boton boton-bloque">Crear cuenta</button>
+  </form>
+  <p>¿Ya tienes cuenta? <a href="{% url 'login' %}">Ingresa</a></p>
+</div>
+{% endblock %}

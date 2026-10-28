@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Ingresar{% endblock %}
+{% block contenido %}
+<div class="panel formulario-angosto">
+  <h1>Ingresar</h1>
+  {% include "parciales/botones_sociales.html" %}
+  <form method="post">
+    {% csrf_token %}
+    {% include "parciales/formulario.html" %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="boton boton-bloque">Ingresar</button>
+  </form>
+  <p>¿No tienes cuenta? <a href="{% url 'usuarios:registro' %}">Regístrate</a></p>
+</div>
+{% endblock %}

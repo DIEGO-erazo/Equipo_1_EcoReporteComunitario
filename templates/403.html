@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block titulo %}Acceso denegado{% endblock %}
+{% block contenido %}
+<div class="panel formulario-angosto"><h1>Acceso denegado</h1><p>No tienes permiso para realizar esta acción.</p><a class="boton" href="{% url 'inicio' %}">Ir al inicio</a></div>
+{% endblock %}

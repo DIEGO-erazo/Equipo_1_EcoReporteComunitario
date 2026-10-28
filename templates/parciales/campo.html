@@ -1,0 +1,6 @@
+<div class="campo{% if campo.errors %} con-error{% endif %}">
+  <label for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} <span class="obligatorio">*</span>{% endif %}</label>
+  {{ campo }}
+  {% if campo.help_text %}<small class="ayuda">{{ campo.help_text|safe }}</small>{% endif %}
+  {% for error in campo.errors %}<small class="error">{{ error }}</small>{% endfor %}
+</div>

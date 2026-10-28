@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titulo %}Cambiar contraseña{% endblock %}
+{% block contenido %}
+<div class="panel formulario-angosto">
+  <h1>Cambiar contraseña</h1>
+  <form method="post">
+    {% csrf_token %}
+    {% include "parciales/formulario.html" %}
+    <button type="submit" class="boton boton-bloque">Cambiar contraseña</button>
+  </form>
+</div>
+{% endblock %}

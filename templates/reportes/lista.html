@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Reportes{% endblock %}
+{% block contenido %}
+<div class="encabezado-seccion">
+  <h1>Reportes de la comunidad</h1>
+  <a class="boton" href="{% url 'reportes:crear' %}">+ Nuevo reporte</a>
+</div>
+
+<form method="get" class="filtros">
+  {{ filtro.q }} {{ filtro.categoria }} {{ filtro.estado }}
+  <button type="submit" class="boton">Buscar</button>
+  {% if request.GET %}<a href="{% url 'reportes:lista' %}">Limpiar</a>{% endif %}
+</form>
+
+<p class="resultado">{{ pagina.paginator.count }} reporte{{ pagina.paginator.count|pluralize }} encontrado{{ pagina.paginator.count|pluralize }}</p>
+
+{% if pagina.object_list %}
+  <div class="rejilla">{% for reporte in pagina %}{% include "parciales/tarjeta_reporte.html" %}{% endfor %}</div>
+  {% include "parciales/paginacion.html" %}
+{% else %}
+  <p class="vacio">No se encontraron reportes con esos filtros.</p>
+{% endif %}
+{% endblock %}
