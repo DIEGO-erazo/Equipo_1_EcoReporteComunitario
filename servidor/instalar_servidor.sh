@@ -31,17 +31,17 @@ if [ ! -d .git ]; then
 fi
 
 echo "== 1/8 Instalando Python y herramientas =="
-sudo apt-get update -q
-sudo apt-get install -y -q python3 python3-venv python3-pip sqlite3 curl git
+sudo apt-get -o DPkg::Lock::Timeout=600 update -q
+sudo apt-get -o DPkg::Lock::Timeout=600 install -y -q python3 python3-venv python3-pip sqlite3 curl git
 
 # Django 6 necesita Python 3.12 o más nuevo.
 PYTHON=python3
 if ! python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)'; then
     echo "Tu Ubuntu trae $(python3 --version); se instalará Python 3.12 aparte."
-    sudo apt-get install -y -q software-properties-common
+    sudo apt-get -o DPkg::Lock::Timeout=600 install -y -q software-properties-common
     sudo add-apt-repository -y ppa:deadsnakes/ppa
-    sudo apt-get update -q
-    sudo apt-get install -y -q python3.12 python3.12-venv
+    sudo apt-get -o DPkg::Lock::Timeout=600 update -q
+    sudo apt-get -o DPkg::Lock::Timeout=600 install -y -q python3.12 python3.12-venv
     PYTHON=python3.12
 fi
 
