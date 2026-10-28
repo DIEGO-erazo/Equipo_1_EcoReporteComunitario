@@ -9,7 +9,8 @@
 #   5. Instala Cloudflare Tunnel para que la página se abra desde internet.
 #   6. Evita que la laptop se suspenda al cerrar la tapa.
 #   7. Programa un respaldo diario de la base de datos y las fotos.
-#   8. Revisa GitHub cada 2 minutos e instala solo los cambios que pasaron las pruebas.
+#   8. Revisa GitHub cada 2 minutos e instala solo los cambios que pasaron las pruebas
+#      (de la rama que se clonó: main, o la que se indicó con  git clone -b <rama>).
 #
 # Uso: clona el repositorio y, desde su carpeta, ejecuta  bash servidor/instalar_servidor.sh
 set -e

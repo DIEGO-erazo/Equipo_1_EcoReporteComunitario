@@ -156,8 +156,9 @@ bash servidor/ver_direccion.sh       # muestra la dirección pública actual
 journalctl -u ecoreporte-actualizar -n 50   # historial de actualizaciones automáticas
 ```
 
-Cada 2 minutos la laptop revisa la rama `main` en GitHub. Cuando hay un commit nuevo **y pasó las
-pruebas de GitHub Actions**, lo descarga, aplica las migraciones y recarga la app sin cortar las
+Cada 2 minutos la laptop revisa en GitHub la rama que se clonó (`main`, o la que se indique con
+`git clone -b <rama> ...` para probar una rama sin tocar `main`). Cuando hay un commit nuevo **y pasó
+las pruebas de GitHub Actions**, lo descarga, aplica las migraciones y recarga la app sin cortar las
 visitas; si las pruebas fallan, no se instala. Si algo falla durante la actualización, regresa sola
 a la versión anterior. `bash servidor/actualizar.sh` hace una actualización manual inmediata.
 

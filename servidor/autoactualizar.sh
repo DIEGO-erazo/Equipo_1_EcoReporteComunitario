@@ -10,7 +10,8 @@ main() {
     set -e
     cd "$(dirname "$0")/.."
 
-    RAMA="${RAMA:-main}"
+    # Sigue la rama con la que se clonó el proyecto (por ejemplo, main o una rama de pruebas).
+    RAMA="${RAMA:-$(git rev-parse --abbrev-ref HEAD)}"
     git fetch -q origin "$RAMA"
     ACTUAL="$(git rev-parse HEAD)"
     NUEVO="$(git rev-parse "origin/$RAMA")"
