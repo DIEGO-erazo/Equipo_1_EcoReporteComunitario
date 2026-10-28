@@ -164,8 +164,12 @@ a la versión anterior. `bash servidor/actualizar.sh` hace una actualización ma
 
 La app y el túnel arrancan solos al encender la laptop, que sigue funcionando con la tapa cerrada.
 Cada día se guarda un respaldo de la base de datos y las fotos en `~/respaldos_ecoreporte`.
-La dirección gratuita (`*.trycloudflare.com`) cambia cada vez que se reinicia la laptop; para una fija
-hay que registrar un dominio propio en Cloudflare.
+La dirección gratuita (`*.trycloudflare.com`) cambia cada vez que se reinicia la laptop. Para una
+**dirección fija y gratuita** (`https://ecoreporte.<tu-red>.ts.net`) con Tailscale Funnel:
+
+```bash
+bash servidor/usar_direccion_fija.sh   # pide iniciar sesión en Tailscale y activar Funnel
+```
 
 ### Ejecutar las pruebas
 

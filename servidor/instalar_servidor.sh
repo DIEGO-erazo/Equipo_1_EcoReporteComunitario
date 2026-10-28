@@ -99,7 +99,16 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-echo "== 6/8 Cloudflare Tunnel (acceso desde internet) =="
+sudo systemctl daemon-reload
+sudo systemctl enable --now ecoreporte.service
+sudo systemctl restart ecoreporte.service
+
+echo "== 6/8 Acceso desde internet =="
+# Con dirección fija (servidor/usar_direccion_fija.sh) no se usa el túnel temporal.
+DIRECCION_FIJA="$(grep -oP '^DIRECCION_FIJA=\K.+' .env || true)"
+if [ -n "$DIRECCION_FIJA" ]; then
+    echo "Se usa la dirección fija $DIRECCION_FIJA (Tailscale Funnel)."
+else
 if ! command -v cloudflared > /dev/null; then
     curl -fsSL -o /tmp/cloudflared.deb \
         https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
@@ -124,8 +133,9 @@ WantedBy=multi-user.target
 EOF
 
 sudo systemctl daemon-reload
-sudo systemctl enable --now ecoreporte.service ecoreporte-tunel.service
-sudo systemctl restart ecoreporte.service ecoreporte-tunel.service
+sudo systemctl enable --now ecoreporte-tunel.service
+sudo systemctl restart ecoreporte-tunel.service
+fi
 
 echo "== 7/8 Tapa cerrada y respaldos =="
 # Que la laptop siga encendida con la tapa cerrada (aplica después de reiniciar).
@@ -178,6 +188,14 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable --now ecoreporte-actualizar.timer
 
+if [ -n "$DIRECCION_FIJA" ]; then
+    echo
+    echo "============================================================"
+    echo " ¡Listo! EcoReporte está corriendo en $DIRECCION_FIJA"
+    echo "============================================================"
+    exit 0
+fi
+
 echo
 echo "Esperando la dirección pública..."
 for _ in $(seq 1 30); do
@@ -196,4 +214,5 @@ else
 fi
 echo " Esta dirección cambia cada vez que se reinicia la laptop;"
 echo " consúltala de nuevo con:  bash servidor/ver_direccion.sh"
+echo " Para una dirección fija y gratuita:  bash servidor/usar_direccion_fija.sh"
 echo "============================================================"
