@@ -11,6 +11,7 @@
       <input type="hidden" name="next" value="{{ next }}">
       <button type="submit" class="btn btn-primary w-100 mb-3">Ingresar</button>
     </form>
+    <p class="text-center mb-2"><a href="{% url 'usuarios:recuperar' %}">¿Olvidaste tu contraseña?</a></p>
     <p class="mb-0 text-center">¿No tienes cuenta? <a href="{% url 'usuarios:registro' %}">Regístrate</a></p>
   </div>
 </div>

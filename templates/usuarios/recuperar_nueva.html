@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titulo %}Nueva contraseña{% endblock %}
+{% block contenido %}
+<div class="card border-0 shadow-sm formulario-angosto">
+  <div class="card-body p-4">
+    {% if validlink %}
+      <h1 class="h3 mb-3">Crea tu nueva contraseña</h1>
+      <form method="post">
+        {% csrf_token %}
+        {% include "parciales/formulario.html" %}
+        <button type="submit" class="btn btn-primary w-100">Guardar contraseña</button>
+      </form>
+    {% else %}
+      <h1 class="h3 mb-3">El enlace ya no sirve</h1>
+      <div class="alert alert-warning">Este enlace ya se usó o venció. Pide uno nuevo.</div>
+      <a class="btn btn-primary w-100" href="{% url 'usuarios:recuperar' %}">Pedir otro enlace</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

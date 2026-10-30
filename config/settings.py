@@ -222,12 +222,39 @@ MAX_TAMANO_EVIDENCIA = 5 * 1024 * 1024
 
 
 # Email
+# Sin CORREO_USUARIO en el .env, los correos solo se muestran en la consola del servidor.
+# Con una cuenta de Gmail y su "contraseña de aplicación" se envían de verdad
+# (pasos en documentacion/recuperar_contrasena.md).
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+CORREO_USUARIO = os.getenv("CORREO_USUARIO", "").strip()
+CORREO_CONFIGURADO = bool(CORREO_USUARIO)
+
+if CORREO_CONFIGURADO:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+            'OPTIONS': {
+                'host': os.getenv("CORREO_SERVIDOR", "smtp.gmail.com"),
+                'port': int(os.getenv("CORREO_PUERTO", "587")),
+                'username': CORREO_USUARIO,
+                # Gmail muestra la contraseña de aplicación con espacios; se quitan.
+                'password': os.getenv("CORREO_CONTRASENA", "").replace(" ", ""),
+                'use_tls': True,
+                'timeout': 20,
+            },
+        },
+    }
+else:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        },
+    }
+
+DEFAULT_FROM_EMAIL = f"EcoReporte Comunitario <{CORREO_USUARIO or 'no-responder@ecoreporte.local'}>"
+
+# El enlace para recuperar la contraseña vence a las 24 horas.
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24
 
 
 if not DEBUG:

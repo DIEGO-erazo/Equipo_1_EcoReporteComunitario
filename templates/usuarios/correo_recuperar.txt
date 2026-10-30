@@ -1,0 +1,14 @@
+{% autoescape off %}Hola{% if user.first_name %} {{ user.first_name }}{% endif %}:
+
+Recibimos una solicitud para cambiar la contraseña de tu cuenta en EcoReporte Comunitario.
+Para crear una contraseña nueva, abre este enlace:
+
+{{ protocol }}://{{ domain }}{% url 'usuarios:recuperar_confirmar' uidb64=uid token=token %}
+
+El enlace sirve una sola vez y vence en 24 horas.
+
+Si no pediste este cambio, ignora este correo: tu contraseña seguirá igual.
+
+EcoReporte Comunitario
+San Rafael, Chalatenango
+{% endautoescape %}

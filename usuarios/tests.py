@@ -1,6 +1,13 @@
+import re
+import smtplib
+from unittest import mock
+from urllib.parse import urlparse
+
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import PasswordResetForm
+from django.core import mail
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .models import Rol, Usuario
@@ -108,3 +115,60 @@ class InicioSesionSocialTest(TestCase):
     def test_paginas_de_allauth_redirigen_a_las_del_proyecto(self):
         self.assertRedirects(self.client.get('/cuentas/login/'), reverse('login'))
         self.assertRedirects(self.client.get('/cuentas/signup/'), reverse('usuarios:registro'))
+
+
+class RecuperarContrasenaTest(TestCase):
+    def setUp(self):
+        call_command('cargar_datos_iniciales', verbosity=0)
+        self.client.post(reverse('usuarios:registro'), {
+            'nombre': 'Carlos', 'apellido': 'Hernández', 'correo': 'carlos@correo.com', 'telefono': '',
+            'password1': 'unaClaveSegura2026', 'password2': 'unaClaveSegura2026',
+        })
+        self.client.logout()
+
+    def test_ingresar_tiene_enlace_para_recuperar(self):
+        self.assertContains(self.client.get(reverse('login')), reverse('usuarios:recuperar'))
+
+    def test_envia_enlace_y_permite_cambiar_la_contrasena(self):
+        respuesta = self.client.post(reverse('usuarios:recuperar'), {'email': 'CARLOS@correo.com'})
+        self.assertRedirects(respuesta, reverse('usuarios:recuperar_enviado'))
+        self.assertEqual(len(mail.outbox), 1)
+        correo = mail.outbox[0]
+        self.assertEqual(correo.to, ['carlos@correo.com'])
+        self.assertEqual(correo.subject, 'Recupera tu contraseña de EcoReporte Comunitario')
+        enlace = re.search(r'https?://\S+', correo.body).group()
+        self.assertTrue(enlace.startswith('https://'))
+
+        # Django cambia el enlace por uno sin el token antes de mostrar el formulario.
+        respuesta = self.client.get(urlparse(enlace).path, follow=True)
+        self.assertContains(respuesta, 'Crea tu nueva contraseña')
+        respuesta = self.client.post(respuesta.redirect_chain[-1][0], {
+            'new_password1': 'otraClaveNueva2026', 'new_password2': 'otraClaveNueva2026',
+        })
+        self.assertRedirects(respuesta, reverse('usuarios:recuperar_listo'))
+        self.assertTrue(self.client.login(username='carlos@correo.com', password='otraClaveNueva2026'))
+
+        self.client.logout()
+        respuesta = self.client.get(urlparse(enlace).path, follow=True)
+        self.assertContains(respuesta, 'El enlace ya no sirve')
+
+    def test_correo_desconocido_no_envia_nada_ni_lo_revela(self):
+        respuesta = self.client.post(reverse('usuarios:recuperar'), {'email': 'nadie@correo.com'})
+        self.assertRedirects(respuesta, reverse('usuarios:recuperar_enviado'))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_si_falla_el_envio_muestra_un_mensaje(self):
+        with mock.patch.object(PasswordResetForm, 'send_mail', side_effect=smtplib.SMTPException), \
+                self.assertLogs('usuarios.views', level='ERROR'):
+            respuesta = self.client.post(reverse('usuarios:recuperar'), {'email': 'carlos@correo.com'}, follow=True)
+        self.assertRedirects(respuesta, reverse('usuarios:recuperar'))
+        self.assertContains(respuesta, 'No pudimos enviar el correo')
+
+    def test_avisa_cuando_el_sitio_no_puede_enviar_correos(self):
+        with self.settings(CORREO_CONFIGURADO=False):
+            self.assertContains(self.client.get(reverse('usuarios:recuperar')), 'no puede enviar correos')
+        with self.settings(CORREO_CONFIGURADO=True):
+            self.assertNotContains(self.client.get(reverse('usuarios:recuperar')), 'no puede enviar correos')
+
+    def test_pagina_de_allauth_redirige_a_la_del_proyecto(self):
+        self.assertRedirects(self.client.get('/cuentas/password/reset/'), reverse('usuarios:recuperar'))
