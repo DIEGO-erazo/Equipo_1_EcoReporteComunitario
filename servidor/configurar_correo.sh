@@ -25,16 +25,31 @@ if [ -z "$CORREO" ] || [ "${#CLAVE}" -ne 16 ]; then
 fi
 
 echo "Probando la conexión con Gmail..."
-# Las variables puestas aquí tienen prioridad sobre el .env, así se prueba sin guardar nada.
-if ! CORREO_USUARIO="$CORREO" CORREO_CONTRASENA="$CLAVE" .venv/bin/python manage.py shell -v 0 \
-        -c "from django.core.mail import mailers; c = mailers.default; c.open(); c.close()" 2> /tmp/ecoreporte-correo.log; then
-    echo "Gmail no aceptó esos datos. No se cambió nada."
-    echo "Revisa que la verificación en 2 pasos esté activa y copia de nuevo la contraseña de aplicación."
-    echo "Detalle del error: $(tail -n 1 /tmp/ecoreporte-correo.log)"
-    rm -f /tmp/ecoreporte-correo.log
+# Un solo intento de ingreso: smtplib.login() prueba un segundo método cuando Gmail
+# rechaza el primero, Gmail cierra la conexión y el error real (535) queda oculto.
+if ! RESPUESTA="$(CORREO_USUARIO="$CORREO" CORREO_CONTRASENA="$CLAVE" .venv/bin/python - 2>&1 <<'EOF'
+import os, smtplib, sys
+try:
+    s = smtplib.SMTP(os.getenv('CORREO_SERVIDOR', 'smtp.gmail.com'), int(os.getenv('CORREO_PUERTO', '587')), timeout=20)
+    s.starttls()
+    s.ehlo()
+    s.user, s.password = os.environ['CORREO_USUARIO'], os.environ['CORREO_CONTRASENA']
+    s.auth('PLAIN', s.auth_plain)
+    s.quit()
+except smtplib.SMTPAuthenticationError as e:
+    print('Gmail respondió: ' + e.smtp_error.decode(errors='replace').splitlines()[0])
+    sys.exit(1)
+except Exception as e:
+    print('No se pudo conectar con Gmail: ' + type(e).__name__ + ': ' + str(e))
+    sys.exit(1)
+EOF
+)"; then
+    echo "$RESPUESTA"
+    echo "No se cambió nada."
+    echo "Revisa que la contraseña de aplicación sea de ESA MISMA cuenta ($CORREO),"
+    echo "que la verificación en 2 pasos esté activa y que copiaste las 16 letras completas."
     exit 1
 fi
-rm -f /tmp/ecoreporte-correo.log
 
 # Reemplaza la configuración anterior, si la había.
 sed -i '/^CORREO_USUARIO=/d; /^CORREO_CONTRASENA=/d' .env
