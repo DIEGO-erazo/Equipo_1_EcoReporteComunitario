@@ -1,7 +1,7 @@
 {% load allauth %}
-{% comment %} Igual al botón de allauth, con las clases de estilo del proyecto. djlint:off {% endcomment %}
+{% comment %} Igual al botón de allauth, con las clases de Bootstrap. djlint:off {% endcomment %}
 <{% if attrs.href %}a href="{{ attrs.href }}"{% else %}button{% endif %}
- class="boton{% if 'danger' in attrs.tags %} boton-peligro{% elif 'secondary' in attrs.tags or 'outline' in attrs.tags %} boton-secundario{% endif %}"
+ class="btn{% if 'danger' in attrs.tags %} btn-danger{% elif 'secondary' in attrs.tags or 'outline' in attrs.tags %} btn-outline-secondary{% else %} btn-primary{% endif %}"
 {% if attrs.form %}form="{{ attrs.form }}"{% endif %}
 {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
 {% if attrs.name %}name="{{ attrs.name }}"{% endif %}

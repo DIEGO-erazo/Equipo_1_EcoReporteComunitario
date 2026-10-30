@@ -1,11 +1,11 @@
 {% load socialaccount %}
 {% get_providers as proveedores %}
 {% if proveedores %}
-  <div class="botones-sociales">
+  <div class="d-grid gap-2 my-3">
     {% for proveedor in proveedores %}
-      <form method="post" action="{% provider_login_url proveedor.id next=next %}">
+      <form method="post" action="{% provider_login_url proveedor.id next=next %}" class="d-grid">
         {% csrf_token %}
-        <button type="submit" class="boton boton-social boton-{{ proveedor.id }}">Continuar con {{ proveedor.name }}</button>
+        <button type="submit" class="btn btn-outline-secondary boton-{{ proveedor.id }}">Continuar con {{ proveedor.name }}</button>
       </form>
     {% endfor %}
   </div>

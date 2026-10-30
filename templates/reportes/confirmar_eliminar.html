@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 {% block titulo %}Eliminar reporte{% endblock %}
 {% block contenido %}
-<div class="panel formulario-angosto">
-  <h1>¿Eliminar este reporte?</h1>
-  <p>Se eliminará <strong>«{{ reporte.titulo }}»</strong> junto con sus fotos y su historial. Esta acción no se puede deshacer.</p>
-  <form method="post">
-    {% csrf_token %}
-    <div class="acciones">
-      <button type="submit" class="boton boton-peligro">Sí, eliminar</button>
-      <a class="boton boton-secundario" href="{{ reporte.get_absolute_url }}">Cancelar</a>
-    </div>
-  </form>
+<div class="card border-0 shadow-sm formulario-angosto">
+  <div class="card-body p-4">
+    <h1 class="h4">¿Eliminar este reporte?</h1>
+    <div class="alert alert-warning mb-0">Se eliminará <strong>«{{ reporte.titulo }}»</strong> junto con sus fotos y su historial. Esta acción no se puede deshacer.</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+        <a class="btn btn-outline-secondary" href="{{ reporte.get_absolute_url }}">Cancelar</a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

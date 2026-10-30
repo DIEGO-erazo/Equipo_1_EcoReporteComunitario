@@ -5,51 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block titulo %}EcoReporte Comunitario{% endblock %} · EcoReporte</title>
   <link rel="icon" href="{% static 'img/hoja.svg' %}" type="image/svg+xml">
+  {# Bootstrap 5.3.3 va dentro del proyecto para que el sitio funcione sin internet. #}
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
 </head>
-<body>
-  <header class="barra">
-    <div class="contenedor barra-interna">
-      <a class="marca" href="{% url 'inicio' %}">
+<body class="d-flex flex-column min-vh-100">
+  {% with seccion=request.resolver_match.namespace pagina_actual=request.resolver_match.url_name %}
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="{% url 'inicio' %}">
         <img src="{% static 'img/hoja.svg' %}" alt="" width="28" height="28">
-        <span>EcoReporte <small>Comunitario</small></span>
+        <span>EcoReporte <small class="fw-normal opacity-75">Comunitario</small></span>
       </a>
-      <input type="checkbox" id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
-      <label for="menu-toggle" class="menu-boton" aria-hidden="true">☰</label>
-      <nav class="menu">
-        <a href="{% url 'reportes:lista' %}">Reportes</a>
-        {% if user.is_authenticated %}
-          <a href="{% url 'reportes:mis_reportes' %}">Mis reportes</a>
-          {% if perfil.es_administrador %}<a href="{% url 'admin:index' %}">Administración</a>{% endif %}
-          <a href="{% url 'usuarios:perfil' %}">{{ perfil.nombre }}</a>
-          <form method="post" action="{% url 'logout' %}" class="en-linea">{% csrf_token %}
-            <button type="submit" class="enlace">Salir</button>
-          </form>
-          <a class="boton boton-claro" href="{% url 'reportes:crear' %}">+ Reportar</a>
-        {% else %}
-          <a href="{% url 'login' %}">Ingresar</a>
-          <a class="boton boton-claro" href="{% url 'usuarios:registro' %}">Crear cuenta</a>
-        {% endif %}
-      </nav>
-    </div>
-  </header>
-
-  <main class="contenedor contenido">
-    {% if messages %}
-      <div class="mensajes">
-        {% for message in messages %}
-          <div class="mensaje mensaje-{{ message.tags }}" role="status">{{ message }}</div>
-        {% endfor %}
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu-principal"
+              aria-controls="menu-principal" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="menu-principal">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+          <li class="nav-item">
+            <a class="nav-link{% if pagina_actual == 'inicio' %} active{% endif %}" href="{% url 'inicio' %}">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link{% if seccion == 'reportes' and pagina_actual != 'mis_reportes' %} active{% endif %}" href="{% url 'reportes:lista' %}">Reportes</a>
+          </li>
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link{% if pagina_actual == 'mis_reportes' %} active{% endif %}" href="{% url 'reportes:mis_reportes' %}">Mis reportes</a>
+            </li>
+            {% if perfil.es_administrador %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle{% if seccion == 'gestion' %} active{% endif %}" href="#" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">Gestión</a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="{% url 'gestion:panel' %}">Panel</a></li>
+                  <li><a class="dropdown-item" href="{% url 'gestion:categorias' %}">Categorías</a></li>
+                  <li><a class="dropdown-item" href="{% url 'gestion:estados' %}">Estados</a></li>
+                  <li><a class="dropdown-item" href="{% url 'gestion:usuarios' %}">Usuarios</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="{% url 'admin:index' %}">Administración de Django</a></li>
+                </ul>
+              </li>
+            {% endif %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle{% if seccion == 'usuarios' %} active{% endif %}" href="#" role="button"
+                 data-bs-toggle="dropdown" aria-expanded="false">{{ perfil.nombre }}</a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">Mi perfil</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+                    <button type="submit" class="dropdown-item">Salir</button>
+                  </form>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item ms-lg-2 my-2 my-lg-0">
+              <a class="btn btn-light text-primary fw-semibold" href="{% url 'reportes:crear' %}">+ Reportar</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link{% if pagina_actual == 'login' %} active{% endif %}" href="{% url 'login' %}">Ingresar</a>
+            </li>
+            <li class="nav-item ms-lg-2 my-2 my-lg-0">
+              <a class="btn btn-light text-primary fw-semibold" href="{% url 'usuarios:registro' %}">Crear cuenta</a>
+            </li>
+          {% endif %}
+        </ul>
       </div>
-    {% endif %}
+    </div>
+  </nav>
+  {% endwith %}
+
+  <main class="container flex-grow-1 py-4">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="status">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+      </div>
+    {% endfor %}
     {% block contenido %}{% endblock %}
   </main>
 
-  <footer class="pie">
-    <div class="contenedor">
-      <p><strong>EcoReporte Comunitario</strong> · San Rafael, Chalatenango, El Salvador</p>
-      <p>Proyecto de Proyección Social · Universidad Dr. Andrés Bello · Ciclo 02-2026 · Equipo 1</p>
+  <footer class="pie py-3 mt-auto">
+    <div class="container small">
+      <p class="mb-1"><strong>EcoReporte Comunitario</strong> · San Rafael, Chalatenango, El Salvador</p>
+      <p class="mb-0">Proyecto de Proyección Social · Universidad Dr. Andrés Bello · Ciclo 02-2026 · Equipo 1</p>
     </div>
   </footer>
+  <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

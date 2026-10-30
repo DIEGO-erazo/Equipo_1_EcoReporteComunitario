@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block titulo %}Panel de gestión{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3">Panel de gestión</h1>
+
+<div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+  <div class="col"><a class="card border-0 shadow-sm h-100 text-decoration-none estadistica" href="{% url 'reportes:lista' %}">
+    <div class="card-body text-center"><span class="d-block display-6 fw-bold">{{ total_reportes }}</span>Reportes</div></a></div>
+  <div class="col"><a class="card border-0 shadow-sm h-100 text-decoration-none estadistica" href="{% url 'gestion:usuarios' %}">
+    <div class="card-body text-center"><span class="d-block display-6 fw-bold">{{ total_usuarios }}</span>Usuarios</div></a></div>
+  <div class="col"><a class="card border-0 shadow-sm h-100 text-decoration-none estadistica" href="{% url 'gestion:categorias' %}">
+    <div class="card-body text-center"><span class="d-block display-6 fw-bold">{{ total_categorias }}</span>Categorías</div></a></div>
+  <div class="col"><a class="card border-0 shadow-sm h-100 text-decoration-none estadistica" href="{% url 'gestion:estados' %}">
+    <div class="card-body text-center"><span class="d-block display-6 fw-bold">{{ total_estados }}</span>Estados</div></a></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Reportes por estado</h2>
+        {% for estado in por_estado %}
+          <div class="d-flex justify-content-between small mb-1">
+            {% include "parciales/etiqueta_estado.html" %}<span>{{ estado.total }}</span>
+          </div>
+          <div class="progress mb-3" role="progressbar" aria-label="{{ estado }}" aria-valuenow="{{ estado.total }}" aria-valuemin="0" aria-valuemax="{{ total_reportes }}">
+            <div class="progress-bar barra-{{ estado.clase_css }}" style="width: {% widthratio estado.total total_reportes 100 %}%"></div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Reportes por categoría</h2>
+        <ul class="list-group list-group-flush">
+          {% for categoria in por_categoria %}
+            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+              <a href="{% url 'reportes:lista' %}?categoria={{ categoria.pk }}">{{ categoria }}</a>
+              <span class="badge text-bg-primary rounded-pill">{{ categoria.total }}</span>
+            </li>
+          {% empty %}
+            <li class="list-group-item px-0 text-body-secondary">No hay categorías.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Últimos cambios de estado</h2>
+        {% if ultimos_cambios %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead><tr><th>Fecha</th><th>Reporte</th><th>Cambio</th><th>Responsable</th></tr></thead>
+              <tbody>
+                {% for s in ultimos_cambios %}
+                  <tr>
+                    <td class="text-nowrap small">{{ s.fecha_cambio|date:"d/m/Y H:i" }}</td>
+                    <td><a href="{{ s.id_reporte.get_absolute_url }}">{{ s.id_reporte }}</a></td>
+                    <td class="text-nowrap">{{ s.id_estado_anterior }} → {% include "parciales/etiqueta_estado.html" with estado=s.id_estado_nuevo %}</td>
+                    <td>{{ s.id_usuario_responsable.nombre_completo }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-body-secondary fst-italic mb-0">Todavía no hay cambios de estado.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

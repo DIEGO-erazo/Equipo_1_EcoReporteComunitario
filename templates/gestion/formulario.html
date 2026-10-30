@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo_pagina }}{% endblock %}
+{% block contenido %}
+<div class="card border-0 shadow-sm formulario-ancho">
+  <div class="card-body p-4">
+    <h1 class="h3">{{ titulo_pagina }}</h1>
+    {% if subtitulo %}<p class="small text-body-secondary">{{ subtitulo }}</p>{% endif %}
+    <form method="post" class="mt-3">
+      {% csrf_token %}
+      {% include "parciales/formulario.html" %}
+      <div class="d-flex flex-wrap gap-2">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a class="btn btn-outline-secondary" href="{{ url_cancelar }}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

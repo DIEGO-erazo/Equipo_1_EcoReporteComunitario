@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block titulo %}Mis reportes{% endblock %}
 {% block contenido %}
-<div class="encabezado-seccion">
-  <h1>Mis reportes</h1>
-  <a class="boton" href="{% url 'reportes:crear' %}">+ Nuevo reporte</a>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 mb-0">Mis reportes</h1>
+  <a class="btn btn-primary" href="{% url 'reportes:crear' %}">+ Nuevo reporte</a>
 </div>
 {% if pagina.object_list %}
-  <div class="rejilla">{% for reporte in pagina %}{% include "parciales/tarjeta_reporte.html" %}{% endfor %}</div>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">{% for reporte in pagina %}{% include "parciales/tarjeta_reporte.html" %}{% endfor %}</div>
   {% include "parciales/paginacion.html" %}
 {% else %}
-  <p class="vacio">Todavía no has hecho reportes. <a href="{% url 'reportes:crear' %}">Crea el primero</a>.</p>
+  <p class="text-body-secondary fst-italic">Todavía no has hecho reportes. <a href="{% url 'reportes:crear' %}">Crea el primero</a>.</p>
 {% endif %}
 {% endblock %}

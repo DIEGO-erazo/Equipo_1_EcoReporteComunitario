@@ -9,6 +9,7 @@ modo debug, base de datos) se leen de variables de entorno o de un archivo
 import os
 from pathlib import Path
 
+from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -59,6 +60,7 @@ INSTALLED_APPS = [
     # Aplicaciones del proyecto EcoReporte Comunitario:
     'usuarios',
     'reportes',
+    'gestion',
 ]
 
 MIDDLEWARE = [
@@ -154,6 +156,9 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'inicio'
 LOGOUT_REDIRECT_URL = 'inicio'
+
+# Bootstrap llama "danger" a las alertas de error.
+MESSAGE_TAGS = {messages.ERROR: 'danger'}
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',

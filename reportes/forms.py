@@ -51,6 +51,10 @@ class ReporteForm(forms.ModelForm):
             'longitud': forms.NumberInput(attrs={'step': 'any', 'placeholder': 'Opcional'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['id_categoria'].empty_label = 'Elige una categoría'
+
 
 class CambioEstadoForm(forms.Form):
     nuevo_estado = forms.ModelChoiceField(queryset=Estado.objects.all(), label='Nuevo estado', empty_label=None)

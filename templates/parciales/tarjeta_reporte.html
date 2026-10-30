@@ -1,18 +1,20 @@
 {% load humanize %}
-<article class="tarjeta">
-  <a href="{{ reporte.get_absolute_url }}" class="tarjeta-imagen">
+<div class="col">
+  <article class="card h-100 border-0 shadow-sm tarjeta">
     {% with foto=reporte.evidencias.all.0 %}
-      {% if foto %}<img src="{{ foto.url_imagen.url }}" alt="Foto del reporte" loading="lazy">
-      {% else %}<span class="sin-foto">🍃</span>{% endif %}
+      {% if foto %}<img src="{{ foto.url_imagen.url }}" class="card-img-top tarjeta-imagen" alt="Foto del reporte" loading="lazy">
+      {% else %}<div class="card-img-top tarjeta-imagen sin-foto" aria-hidden="true">🍃</div>{% endif %}
     {% endwith %}
-  </a>
-  <div class="tarjeta-cuerpo">
-    <div class="etiquetas">
-      <span class="etiqueta estado-{{ reporte.id_estado.clase_css }}">{{ reporte.id_estado }}</span>
-      <span class="etiqueta categoria">{{ reporte.id_categoria }}</span>
+    <div class="card-body">
+      <div class="d-flex flex-wrap gap-1 mb-2">
+        {% include "parciales/etiqueta_estado.html" with estado=reporte.id_estado %}
+        <span class="badge rounded-pill text-bg-light border">{{ reporte.id_categoria }}</span>
+      </div>
+      <h3 class="h6 card-title mb-1">
+        <a class="stretched-link text-reset text-decoration-none" href="{{ reporte.get_absolute_url }}">{{ reporte.titulo }}</a>
+      </h3>
+      <p class="card-text small text-body-secondary mb-0">📍 {{ reporte.ubicacion_direccion }}</p>
     </div>
-    <h3><a href="{{ reporte.get_absolute_url }}">{{ reporte.titulo }}</a></h3>
-    <p class="lugar">📍 {{ reporte.ubicacion_direccion }}</p>
-    <p class="fecha">{{ reporte.fecha_reporte|naturaltime }}</p>
-  </div>
-</article>
+    <div class="card-footer bg-transparent border-0 pt-0 small text-body-secondary">{{ reporte.fecha_reporte|naturaltime }}</div>
+  </article>
+</div>
