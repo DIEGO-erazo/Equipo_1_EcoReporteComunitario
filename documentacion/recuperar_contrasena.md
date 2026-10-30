@@ -18,21 +18,15 @@ servidor, y la página avisa que por ahora no se pueden enviar.
 3. Crea una **contraseña de aplicación** en <https://myaccount.google.com/apppasswords>.
    Ponle de nombre `EcoReporte` y copia las 16 letras que muestra Google.
    (No es la contraseña normal de la cuenta; si la borras ahí, el sitio deja de enviar correos.)
-4. En la laptop del servidor, abre el archivo `.env` de la carpeta del proyecto:
+4. En la laptop del servidor, abre una terminal en la carpeta del proyecto y ejecuta:
    ```bash
-   nano .env
+   bash servidor/configurar_correo.sh
    ```
-   y agrega al final:
-   ```
-   CORREO_USUARIO=ecoreporte.sanrafael@gmail.com
-   CORREO_CONTRASENA=abcd efgh ijkl mnop
-   ```
-   (Pega las 16 letras como las da Google; los espacios no importan.)
-   Guarda con `Ctrl+O`, `Enter` y sal con `Ctrl+X`.
-5. Reinicia la página para que lea los cambios:
-   ```bash
-   sudo systemctl restart ecoreporte
-   ```
+   Te pide el correo y las 16 letras (no se ven al escribirlas), prueba que Gmail los acepte,
+   los guarda en el `.env` y reinicia la página. Si Gmail los rechaza, no cambia nada.
+5. Si prefieres hacerlo a mano: agrega al final del `.env` del proyecto
+   `CORREO_USUARIO=tucorreo@gmail.com` y `CORREO_CONTRASENA=las 16 letras`, y luego
+   ejecuta `sudo systemctl restart ecoreporte`.
 6. Prueba: abre la página → **Ingresar** → **¿Olvidaste tu contraseña?** y escribe tu correo.
 
 El `.env` no se sube a GitHub, así que la contraseña de aplicación queda solo en el servidor.
