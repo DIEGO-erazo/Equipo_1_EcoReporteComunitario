@@ -172,3 +172,11 @@ class RecuperarContrasenaTest(TestCase):
 
     def test_pagina_de_allauth_redirige_a_la_del_proyecto(self):
         self.assertRedirects(self.client.get('/cuentas/password/reset/'), reverse('usuarios:recuperar'))
+
+
+class VerContrasenaTest(TestCase):
+    def test_campos_de_contrasena_tienen_boton_para_verla(self):
+        self.assertContains(self.client.get(reverse('login')), 'data-ver-contrasena', count=1)
+        respuesta = self.client.get(reverse('usuarios:registro'))
+        self.assertContains(respuesta, 'data-ver-contrasena', count=2)
+        self.assertContains(respuesta, 'js/ver_contrasena.js')

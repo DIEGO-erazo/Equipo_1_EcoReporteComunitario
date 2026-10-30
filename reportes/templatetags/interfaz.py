@@ -22,3 +22,8 @@ def bootstrap(campo):
 @register.filter
 def es_casilla(campo):
     return isinstance(campo.field.widget, forms.CheckboxInput)
+
+
+@register.filter
+def es_contrasena(campo):
+    return isinstance(campo.field.widget, forms.PasswordInput)
