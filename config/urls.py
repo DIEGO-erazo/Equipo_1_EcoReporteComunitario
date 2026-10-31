@@ -16,6 +16,7 @@ urlpatterns = [
     path('', reportes_views.inicio, name='inicio'),
     path('reportes/', include('reportes.urls')),
     path('usuarios/', include('usuarios.urls')),
+    path('gestion/', include('gestion.urls')),
     *sesion_urlpatterns,
     # allauth trae sus propias páginas de ingreso y registro; se mandan a las del
     # proyecto para que solo haya una de cada una.

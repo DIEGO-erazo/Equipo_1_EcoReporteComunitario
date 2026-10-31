@@ -25,6 +25,8 @@ class Estado(models.Model):
     EN_PROCESO = 'En proceso'
     RESUELTO = 'Resuelto'
     RECHAZADO = 'Rechazado'
+    # Estados que el código usa por nombre; no se pueden renombrar ni eliminar.
+    DEL_SISTEMA = (PENDIENTE, EN_PROCESO, RESUELTO, RECHAZADO)
 
     id_estado = models.AutoField(primary_key=True)
     nombre_estado = models.CharField(max_length=50, unique=True)
@@ -40,6 +42,10 @@ class Estado(models.Model):
             defaults={'nombre_estado': cls.PENDIENTE},
         )
         return estado
+
+    @property
+    def es_del_sistema(self):
+        return self.nombre_estado.lower() in {nombre.lower() for nombre in self.DEL_SISTEMA}
 
     @property
     def clase_css(self):
