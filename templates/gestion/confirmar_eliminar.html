@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Eliminar {{ nombre_singular }}{% endblock %}
+{% block contenido %}
+<div class="card border-0 shadow-sm formulario-angosto">
+  <div class="card-body p-4">
+    <p class="text-uppercase small text-body-secondary mb-1">{{ nombre_singular }}</p>
+    <h1 class="h4">¿Eliminar «{{ object }}»?</h1>
+    {% if motivo_bloqueo %}
+      <div class="alert alert-danger">{{ motivo_bloqueo }}</div>
+      <a class="btn btn-outline-secondary" href="{{ url_cancelar }}">Volver</a>
+    {% else %}
+      <div class="alert alert-warning">{% if aviso %}{{ aviso }} {% endif %}Esta acción no se puede deshacer.</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="d-flex flex-wrap gap-2">
+          <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+          <a class="btn btn-outline-secondary" href="{{ url_cancelar }}">Cancelar</a>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
