@@ -11,6 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from openpyxl import load_workbook
 from PIL import Image
 
 from usuarios.models import Rol, Usuario
@@ -276,3 +277,48 @@ class AvisoPorCorreoTest(BaseReportesTest):
         self.assertEqual(reporte.id_estado, self.resuelto)
         self.assertContains(respuesta, 'Estado actualizado a «Resuelto».')
         self.assertNotContains(respuesta, 'Se avisó por correo')
+
+
+class ExportarTest(BaseReportesTest):
+    def test_solo_administradores_pueden_descargar(self):
+        for nombre in ('reportes:exportar_excel', 'reportes:exportar_pdf'):
+            self.assertEqual(self.client.get(reverse(nombre)).status_code, 302)
+            self.ingresar(self.vecino)
+            self.assertEqual(self.client.get(reverse(nombre)).status_code, 403)
+            self.client.logout()
+
+    def test_excel_con_los_filtros_de_la_lista(self):
+        self.crear_reporte(titulo='=HIPERVINCULO("x")', latitud='14.1345', longitud='-89.03')
+        self.crear_reporte(titulo='Resuelto', id_estado=self.resuelto)
+        self.ingresar(self.admin)
+        respuesta = self.client.get(reverse('reportes:exportar_excel'), {'estado': self.pendiente.pk})
+        self.assertEqual(respuesta['Content-Type'],
+                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        self.assertIn('attachment; filename="reportes_ecoreporte_', respuesta['Content-Disposition'])
+
+        hoja = load_workbook(BytesIO(respuesta.content)).active
+        self.assertEqual(hoja['A2'].value[:17], 'Estado: Pendiente')
+        self.assertEqual(hoja['B4'].value, 'Título')
+        self.assertEqual(hoja.max_row, 5)
+        fila = [celda.value for celda in hoja[5]]
+        self.assertEqual(fila[1:4], ['=HIPERVINCULO("x")', 'Botadero clandestino', 'Pendiente'])
+        self.assertEqual(hoja['B5'].data_type, 's')
+        self.assertEqual(fila[6:10], [14.1345, -89.03, 'Ana Pérez', 'vecino@test.com'])
+
+    def test_pdf(self):
+        self.crear_reporte(titulo='Quebrada contaminada')
+        self.ingresar(self.admin)
+        respuesta = self.client.get(reverse('reportes:exportar_pdf'))
+        self.assertEqual(respuesta['Content-Type'], 'application/pdf')
+        self.assertTrue(respuesta.content.startswith(b'%PDF'))
+
+    def test_pdf_sin_reportes(self):
+        self.ingresar(self.admin)
+        self.assertTrue(self.client.get(reverse('reportes:exportar_pdf')).content.startswith(b'%PDF'))
+
+    def test_boton_de_descarga_solo_para_administradores(self):
+        self.ingresar(self.vecino)
+        self.assertNotContains(self.client.get(reverse('reportes:lista')), 'exportar/excel')
+        self.ingresar(self.admin)
+        self.assertContains(self.client.get(reverse('reportes:lista'), {'q': 'basura'}),
+                            'href="/reportes/exportar/excel/?q=basura"')

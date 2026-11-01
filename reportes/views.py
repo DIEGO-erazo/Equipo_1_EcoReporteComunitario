@@ -5,11 +5,14 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from usuarios.models import Usuario
 
+from . import exportar
 from .forms import CambioEstadoForm, FiltroReportesForm, ReporteForm
 from .models import Estado, Evidencia, ReporteAmbiental
 from .notificaciones import avisar_cambio_de_estado
@@ -65,6 +68,25 @@ def lista(request):
         'pagina': pagina,
         'parametros': _parametros(request),
     })
+
+
+FORMATOS_EXPORTAR = {
+    'excel': (exportar.excel, 'xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+    'pdf': (exportar.pdf, 'pdf', 'application/pdf'),
+}
+
+
+@login_required
+def exportar_reportes(request, formato):
+    """Descarga los reportes de la lista, con los mismos filtros, en Excel o PDF."""
+    if not Usuario.para_cuenta(request.user).es_administrador:
+        raise PermissionDenied
+    generar, extension, tipo = FORMATOS_EXPORTAR[formato]
+    filtro, reportes = _filtrar(request)
+    respuesta = HttpResponse(generar(reportes, filtro), content_type=tipo)
+    nombre = f'reportes_ecoreporte_{timezone.localdate():%Y-%m-%d}.{extension}'
+    respuesta['Content-Disposition'] = f'attachment; filename="{nombre}"'
+    return respuesta
 
 
 def mapa(request):

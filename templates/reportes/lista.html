@@ -4,6 +4,17 @@
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
   <h1 class="h3 mb-0">Reportes de la comunidad</h1>
   <div class="d-flex flex-wrap gap-2">
+    {% if perfil.es_administrador %}
+      <div class="dropdown">
+        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Descargar</button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="{% url 'reportes:exportar_excel' %}{% if parametros %}?{{ parametros }}{% endif %}">Excel (.xlsx)</a></li>
+          <li><a class="dropdown-item" href="{% url 'reportes:exportar_pdf' %}{% if parametros %}?{{ parametros }}{% endif %}">PDF</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><span class="dropdown-item-text small text-body-secondary">Con los filtros que tienes puestos</span></li>
+        </ul>
+      </div>
+    {% endif %}
     <a class="btn btn-outline-primary" href="{% url 'reportes:mapa' %}{% if parametros %}?{{ parametros }}{% endif %}">Ver en el mapa</a>
     <a class="btn btn-primary" href="{% url 'reportes:crear' %}">+ Nuevo reporte</a>
   </div>

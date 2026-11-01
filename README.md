@@ -74,6 +74,12 @@ Equipo_1_EcoReporteComunitario/
 - **Reportes ambientales:** crear, ver, editar y eliminar reportes con título, categoría, descripción, ubicación y coordenadas opcionales (con enlace al mapa).
 - **Evidencias fotográficas:** se pueden subir varias fotos por reporte (máximo 5 MB cada una).
 - **Búsqueda y filtros:** por texto, categoría y estado, con paginación.
+- **Mapa interactivo:** en `/reportes/mapa/` cada reporte con coordenadas es un punto de color según su estado.
+  Al crear o editar un reporte se marca el lugar tocando el mapa o con "Usar mi ubicación".
+  Usa Leaflet 1.9.4 (incluido en el proyecto) con el mapa de OpenStreetMap, que sí necesita internet.
+- **Aviso por correo:** cuando un administrador cambia el estado de un reporte, su autor recibe un correo con
+  el estado nuevo, el comentario y el enlace al reporte.
+- **Descargar en Excel o PDF (administradores):** botón "Descargar" en la lista de reportes, con los filtros puestos.
 - **Seguimiento:** los administradores cambian el estado (Pendiente, En proceso, Resuelto, Rechazado) con un comentario; cada cambio queda en el historial del reporte.
 - **Roles y permisos:** cada ciudadano solo puede editar sus propios reportes; los administradores pueden gestionar todos.
 - **Gestión (solo administradores):** panel con estadísticas y CRUD de categorías, estados y usuarios
@@ -95,6 +101,8 @@ Equipo_1_EcoReporteComunitario/
 | `/reportes/<id>/eliminar/` | `reportes:eliminar` | Eliminar un reporte (pide confirmación) | Autor o administrador |
 | `/reportes/<id>/estado/` | `reportes:cambiar_estado` | Cambiar el estado con un comentario | Administrador |
 | `/reportes/mios/` | `reportes:mis_reportes` | Reportes de la persona conectada | Con sesión |
+| `/reportes/mapa/` | `reportes:mapa` | Mapa con los reportes, con los mismos filtros de la lista | Todos |
+| `/reportes/exportar/excel/`, `/reportes/exportar/pdf/` | `reportes:exportar_excel`, `reportes:exportar_pdf` | Descargar los reportes filtrados | Administrador |
 | `/ingresar/`, `/salir/` | `login`, `logout` | Iniciar y cerrar sesión | Todos |
 | `/usuarios/registro/` | `usuarios:registro` | Crear cuenta | Todos |
 | `/usuarios/perfil/` | `usuarios:perfil` | Ver y editar el perfil | Con sesión |
