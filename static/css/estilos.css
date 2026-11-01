@@ -1,0 +1,113 @@
+/* EcoReporte Comunitario — estilos propios encima de Bootstrap 5.3.
+   Bootstrap da la estructura (rejilla, barra, tarjetas, formularios, tablas);
+   aquí solo van los colores del proyecto y los componentes que Bootstrap no trae. */
+
+:root {
+  --verde: #2f7d4f;
+  --verde-oscuro: #1f5a38;
+  --verde-claro: #e6f4ea;
+  --amarillo: #a86b00;
+  --azul: #1d5fa8;
+  --rojo: #b3261e;
+
+  /* El color "primary" de Bootstrap pasa a ser el verde del proyecto. */
+  --bs-primary: var(--verde);
+  --bs-primary-rgb: 47, 125, 79;
+  --bs-link-color: var(--verde);
+  --bs-link-color-rgb: 47, 125, 79;
+  --bs-link-hover-color: var(--verde-oscuro);
+  --bs-link-hover-color-rgb: 31, 90, 56;
+  --bs-body-color: #1e2a23;
+  --bs-secondary-color: #5b6b61;
+  --bs-border-radius-lg: 12px;
+}
+
+/* Fondo gris verdoso solo para la página; tarjetas y campos siguen blancos. */
+body { background-color: #f6f8f5; }
+.navbar-dark { --bs-navbar-color: rgba(255, 255, 255, .85); --bs-navbar-hover-color: #fff; }
+
+.btn-primary {
+  --bs-btn-bg: var(--verde);
+  --bs-btn-border-color: var(--verde);
+  --bs-btn-hover-bg: var(--verde-oscuro);
+  --bs-btn-hover-border-color: var(--verde-oscuro);
+  --bs-btn-active-bg: var(--verde-oscuro);
+  --bs-btn-active-border-color: var(--verde-oscuro);
+  --bs-btn-disabled-bg: var(--verde);
+  --bs-btn-disabled-border-color: var(--verde);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--verde);
+  --bs-btn-border-color: var(--verde);
+  --bs-btn-hover-bg: var(--verde);
+  --bs-btn-hover-border-color: var(--verde);
+  --bs-btn-active-bg: var(--verde-oscuro);
+  --bs-btn-active-border-color: var(--verde-oscuro);
+}
+.pagination {
+  --bs-pagination-color: var(--verde);
+  --bs-pagination-hover-color: var(--verde-oscuro);
+  --bs-pagination-active-bg: var(--verde);
+  --bs-pagination-active-border-color: var(--verde);
+}
+.form-control:focus, .form-select:focus, .form-check-input:focus {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 .25rem rgba(47, 125, 79, .25);
+}
+.form-check-input:checked { background-color: var(--verde); border-color: var(--verde); }
+.dropdown-item:active { background-color: var(--verde); }
+
+/* Anchos de los formularios */
+.formulario-angosto { max-width: 460px; margin: 0 auto; }
+.formulario-ancho { max-width: 720px; margin: 0 auto; }
+
+/* Portada del inicio */
+.portada { background: linear-gradient(135deg, var(--verde) 0%, #4b9f6c 100%); }
+
+/* Tarjetas de estadísticas: borde superior de color según el estado */
+.estadistica { border-top: 4px solid var(--verde) !important; color: inherit; }
+a.estadistica:hover { transform: translateY(-2px); transition: transform .15s; }
+.estadistica.estado-pendiente { border-top-color: var(--amarillo) !important; }
+.estadistica.estado-proceso { border-top-color: var(--azul) !important; }
+
+/* Pasos de "¿Cómo funciona?" */
+.paso { display: flex; gap: .75rem; align-items: baseline; }
+.paso-numero {
+  flex: none; width: 2rem; height: 2rem; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--verde-claro); color: var(--verde-oscuro); font-weight: 700;
+}
+
+/* Tarjetas de reportes */
+.tarjeta { transition: box-shadow .15s, transform .15s; }
+.tarjeta:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .1) !important; }
+.tarjeta-imagen { height: 160px; object-fit: cover; }
+.sin-foto { display: flex; align-items: center; justify-content: center; font-size: 3rem; background: var(--verde-claro); }
+.foto-evidencia { width: 100%; height: 140px; object-fit: cover; }
+
+/* Etiquetas de estado */
+.badge.estado-pendiente { background: #fff4e0; color: var(--amarillo); }
+.badge.estado-proceso { background: #e5effa; color: var(--azul); }
+.badge.estado-resuelto { background: var(--verde-claro); color: var(--verde-oscuro); }
+.badge.estado-rechazado { background: #fdecea; color: var(--rojo); }
+.barra-pendiente { background-color: var(--amarillo); }
+.barra-proceso { background-color: var(--azul); }
+.barra-resuelto { background-color: var(--verde); }
+.barra-rechazado { background-color: var(--rojo); }
+
+/* Historial de seguimiento */
+.linea-tiempo { list-style: none; padding: 0 0 0 .25rem; margin: 0; border-left: 3px solid var(--verde-claro); }
+.linea-tiempo li { padding: 0 0 1rem 1rem; position: relative; }
+.linea-tiempo li::before {
+  content: ""; position: absolute; left: -8px; top: 4px;
+  width: 13px; height: 13px; border-radius: 50%; background: var(--verde);
+}
+.linea-tiempo small { display: block; color: var(--bs-secondary-color); }
+.linea-tiempo p { margin: .3rem 0 0; }
+
+/* Separador "o con tu correo" */
+.separador { display: flex; align-items: center; gap: .75rem; color: var(--bs-secondary-color); font-size: .9rem; margin: 1rem 0; }
+.separador::before, .separador::after { content: ""; flex: 1; border-top: 1px solid var(--bs-border-color); }
+
+/* Pie de página */
+.pie { background: var(--verde-oscuro); color: #d6e9dc; }
