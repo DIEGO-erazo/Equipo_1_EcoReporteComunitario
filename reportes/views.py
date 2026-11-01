@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -31,9 +32,10 @@ def inicio(request):
     return render(request, 'reportes/inicio.html', contexto)
 
 
-def lista(request):
+def _filtrar(request):
+    """Aplica la búsqueda y los filtros de la URL; la usan la lista y el mapa."""
     filtro = FiltroReportesForm(request.GET or None)
-    reportes = _reportes().prefetch_related('evidencias')
+    reportes = _reportes()
     if filtro.is_valid():
         q = filtro.cleaned_data['q']
         if q:
@@ -44,14 +46,46 @@ def lista(request):
             reportes = reportes.filter(id_categoria=filtro.cleaned_data['categoria'])
         if filtro.cleaned_data['estado']:
             reportes = reportes.filter(id_estado=filtro.cleaned_data['estado'])
+    return filtro, reportes
 
-    pagina = Paginator(reportes, REPORTES_POR_PAGINA).get_page(request.GET.get('pagina'))
+
+def _parametros(request):
+    """Los filtros actuales como texto de URL, sin el número de página."""
     parametros = request.GET.copy()
     parametros.pop('pagina', None)
+    return parametros.urlencode()
+
+
+def lista(request):
+    filtro, reportes = _filtrar(request)
+    pagina = Paginator(reportes.prefetch_related('evidencias'), REPORTES_POR_PAGINA).get_page(request.GET.get('pagina'))
     return render(request, 'reportes/lista.html', {
         'filtro': filtro,
         'pagina': pagina,
-        'parametros': parametros.urlencode(),
+        'parametros': _parametros(request),
+    })
+
+
+def mapa(request):
+    filtro, reportes = _filtrar(request)
+    puntos = [
+        {
+            'titulo': reporte.titulo,
+            'lat': float(reporte.latitud),
+            'lng': float(reporte.longitud),
+            'estado': reporte.id_estado.nombre_estado,
+            'clase': reporte.id_estado.clase_css,
+            'categoria': reporte.id_categoria.nombre_categoria,
+            'url': reporte.get_absolute_url(),
+        }
+        for reporte in reportes.filter(latitud__isnull=False, longitud__isnull=False)
+    ]
+    return render(request, 'reportes/mapa.html', {
+        'filtro': filtro,
+        'puntos': puntos,
+        'sin_coordenadas': reportes.count() - len(puntos),
+        'mapa_config': {'centro': settings.MAPA_CENTRO, 'zoom': settings.MAPA_ZOOM},
+        'parametros': _parametros(request),
     })
 
 
@@ -82,6 +116,10 @@ def detalle(request, pk):
     return render(request, 'reportes/detalle.html', contexto)
 
 
+def _config_elegir_punto():
+    return {'centro': settings.MAPA_CENTRO, 'zoom': settings.MAPA_ZOOM}
+
+
 def _guardar_fotos(reporte, fotos):
     for foto in fotos:
         Evidencia.objects.create(id_reporte=reporte, url_imagen=foto)
@@ -100,7 +138,9 @@ def crear(request):
             _guardar_fotos(reporte, form.cleaned_data['fotos'])
         messages.success(request, '¡Gracias! Tu reporte fue registrado.')
         return redirect(reporte)
-    return render(request, 'reportes/formulario.html', {'form': form, 'titulo_pagina': 'Nuevo reporte'})
+    return render(request, 'reportes/formulario.html', {
+        'form': form, 'titulo_pagina': 'Nuevo reporte', 'mapa_config': _config_elegir_punto(),
+    })
 
 
 @login_required
@@ -116,7 +156,7 @@ def editar(request, pk):
         messages.success(request, 'El reporte fue actualizado.')
         return redirect(reporte)
     return render(request, 'reportes/formulario.html', {
-        'form': form, 'reporte': reporte, 'titulo_pagina': 'Editar reporte',
+        'form': form, 'reporte': reporte, 'titulo_pagina': 'Editar reporte', 'mapa_config': _config_elegir_punto(),
     })
 
 

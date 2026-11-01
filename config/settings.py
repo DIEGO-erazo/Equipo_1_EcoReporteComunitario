@@ -220,6 +220,10 @@ MEDIA_ROOT = Path(os.getenv("MEDIA_ROOT", BASE_DIR / 'media'))
 # Tamaño máximo de cada foto de evidencia (5 MB).
 MAX_TAMANO_EVIDENCIA = 5 * 1024 * 1024
 
+# Punto donde abre el mapa cuando no hay reportes con coordenadas: San Rafael, Chalatenango.
+MAPA_CENTRO = (14.1345, -89.0300)
+MAPA_ZOOM = 15
+
 
 # Email
 # Sin CORREO_USUARIO en el .env, los correos solo se muestran en la consola del servidor.

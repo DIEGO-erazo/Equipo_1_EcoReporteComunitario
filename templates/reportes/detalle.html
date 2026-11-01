@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block titulo %}{{ reporte.titulo }}{% endblock %}
+{% block cabecera %}{% if reporte.latitud is not None %}{% include "parciales/leaflet.html" %}{% endif %}{% endblock %}
 {% block contenido %}
 <nav aria-label="Ruta de navegación">
   <ol class="breadcrumb">
@@ -24,6 +25,11 @@
             · <a href="https://www.openstreetmap.org/?mlat={{ reporte.latitud|stringformat:'f' }}&mlon={{ reporte.longitud|stringformat:'f' }}#map=18/{{ reporte.latitud|stringformat:'f' }}/{{ reporte.longitud|stringformat:'f' }}" target="_blank" rel="noopener">Ver en el mapa</a>
           {% endif %}
         </p>
+        {% if reporte.latitud is not None and reporte.longitud is not None %}
+          <div class="mapa mapa-pequeno rounded border" data-mapa-punto data-clase="{{ reporte.id_estado.clase_css }}"
+               data-lat="{{ reporte.latitud|stringformat:'f' }}" data-lng="{{ reporte.longitud|stringformat:'f' }}"
+               role="region" aria-label="Ubicación del reporte en el mapa"></div>
+        {% endif %}
         <div class="my-3">{{ reporte.descripcion|linebreaks }}</div>
 
         {% if evidencias %}
@@ -85,3 +91,4 @@
   </aside>
 </div>
 {% endblock %}
+{% block scripts %}{% if reporte.latitud is not None %}{% include "parciales/leaflet_scripts.html" %}{% endif %}{% endblock %}

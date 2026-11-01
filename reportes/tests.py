@@ -199,3 +199,38 @@ class CambioEstadoTest(BaseReportesTest):
         reporte.refresh_from_db()
         self.assertEqual(reporte.id_estado, self.resuelto)
         self.assertEqual(reporte.seguimientos.get().comentario, 'Listo')
+
+
+class MapaTest(BaseReportesTest):
+    def test_mapa_muestra_solo_reportes_con_coordenadas(self):
+        con_punto = self.crear_reporte(titulo='Con punto', latitud='14.133000', longitud='-89.033000')
+        self.crear_reporte(titulo='Sin punto')
+        respuesta = self.client.get(reverse('reportes:mapa'))
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(respuesta.context['puntos'], [{
+            'titulo': 'Con punto', 'lat': 14.133, 'lng': -89.033, 'estado': 'Pendiente',
+            'clase': 'pendiente', 'categoria': 'Botadero clandestino', 'url': con_punto.get_absolute_url(),
+        }])
+        self.assertEqual(respuesta.context['sin_coordenadas'], 1)
+        self.assertContains(respuesta, 'vendor/leaflet/leaflet.js')
+        self.assertContains(respuesta, 'id="mapa-puntos"')
+
+    def test_mapa_usa_los_mismos_filtros_que_la_lista(self):
+        self.crear_reporte(titulo='Pendiente', latitud='14.1', longitud='-89.0')
+        self.crear_reporte(titulo='Resuelto', latitud='14.2', longitud='-89.1', id_estado=self.resuelto)
+        respuesta = self.client.get(reverse('reportes:mapa'), {'estado': self.resuelto.pk})
+        self.assertEqual([p['titulo'] for p in respuesta.context['puntos']], ['Resuelto'])
+
+    def test_detalle_muestra_el_punto_solo_si_tiene_coordenadas(self):
+        reporte = self.crear_reporte(latitud='14.133000', longitud='-89.033000')
+        self.assertContains(self.client.get(reporte.get_absolute_url()), 'data-mapa-punto')
+        reporte = self.crear_reporte()
+        respuesta = self.client.get(reporte.get_absolute_url())
+        self.assertNotContains(respuesta, 'data-mapa-punto')
+        self.assertNotContains(respuesta, 'leaflet.js')
+
+    def test_formulario_trae_el_selector_de_ubicacion(self):
+        self.ingresar(self.vecino)
+        respuesta = self.client.get(reverse('reportes:crear'))
+        self.assertContains(respuesta, 'id="mapa-elegir"')
+        self.assertContains(respuesta, 'id="mapa-config"')

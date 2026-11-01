@@ -26,13 +26,14 @@ CATEGORIAS = [
     ('Otro', 'Otro problema ambiental de la comunidad.'),
 ]
 
+# Las coordenadas son de ejemplo, alrededor del centro de San Rafael.
 REPORTES_DEMO = [
     ('Botadero junto a la quebrada', 'Botadero clandestino', 'Calle hacia el río, después del puente',
-     'Desde hace dos semanas se tira basura a la orilla de la quebrada. Hay bolsas, llantas y plástico.'),
+     'Desde hace dos semanas se tira basura a la orilla de la quebrada. Hay bolsas, llantas y plástico.', '14.133000', '-89.032200'),
     ('Basura acumulada frente al Instituto', 'Acumulación de basura', 'Entrada del Instituto Nacional de San Rafael',
-     'Los fines de semana se acumula basura en la entrada y los perros rompen las bolsas.'),
+     'Los fines de semana se acumula basura en la entrada y los perros rompen las bolsas.', '14.133800', '-89.028800'),
     ('El tren de aseo no pasó esta semana', 'Recolección de residuos', 'Barrio El Centro',
-     'El camión recolector no pasó el martes ni el viernes. Las familias no tienen dónde dejar la basura.'),
+     'El camión recolector no pasó el martes ni el viernes. Las familias no tienen dónde dejar la basura.', '14.134700', '-89.029600'),
 ]
 
 
@@ -76,9 +77,10 @@ class Command(BaseCommand):
 
         if not ReporteAmbiental.objects.exists():
             pendiente = Estado.inicial()
-            for titulo, categoria, ubicacion, descripcion in REPORTES_DEMO:
+            for titulo, categoria, ubicacion, descripcion, latitud, longitud in REPORTES_DEMO:
                 ReporteAmbiental.objects.create(
                     titulo=titulo, descripcion=descripcion, ubicacion_direccion=ubicacion,
+                    latitud=latitud, longitud=longitud,
                     id_categoria=CategoriaProblema.objects.get(nombre_categoria__iexact=categoria),
                     id_estado=pendiente, id_usuario=vecina,
                 )

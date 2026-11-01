@@ -6,6 +6,7 @@ app_name = 'reportes'
 
 urlpatterns = [
     path('', views.lista, name='lista'),
+    path('mapa/', views.mapa, name='mapa'),
     path('nuevo/', views.crear, name='crear'),
     path('mios/', views.mis_reportes, name='mis_reportes'),
     path('<int:pk>/', views.detalle, name='detalle'),
