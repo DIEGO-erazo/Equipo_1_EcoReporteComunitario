@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% comment %}
+  Las páginas de django-allauth (cuentas conectadas, errores al entrar con Google,
+  crear contraseña...) usan el mismo diseño que el resto del sitio.
+{% endcomment %}
+{% block titulo %}{% block head_title %}{% endblock %}{% endblock %}
+{% block contenido %}
+<div class="card border-0 shadow-sm formulario-angosto">
+  <div class="card-body p-4">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

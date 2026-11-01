@@ -1,0 +1,18 @@
+{% load interfaz %}
+{% if campo.is_hidden %}
+  {{ campo }}
+{% elif campo|es_casilla %}
+  <div class="form-check mb-3">
+    {{ campo|bootstrap }}
+    <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+    {% if campo.help_text %}<div class="form-text">{{ campo.help_text|safe }}</div>{% endif %}
+    {% for error in campo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+  </div>
+{% else %}
+  <div class="mb-3">
+    <label class="form-label fw-semibold" for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} <span class="text-danger">*</span>{% endif %}</label>
+    {{ campo|bootstrap }}
+    {% if campo.help_text %}<div class="form-text">{{ campo.help_text|safe }}</div>{% endif %}
+    {% for error in campo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+  </div>
+{% endif %}
