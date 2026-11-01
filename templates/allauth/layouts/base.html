@@ -5,9 +5,7 @@
 {% endcomment %}
 {% block titulo %}{% block head_title %}{% endblock %}{% endblock %}
 {% block contenido %}
-<div class="card border-0 shadow-sm formulario-angosto">
-  <div class="card-body p-4">
-    {% block content %}{% endblock %}
-  </div>
+<div class="panel formulario-angosto">
+  {% block content %}{% endblock %}
 </div>
 {% endblock %}

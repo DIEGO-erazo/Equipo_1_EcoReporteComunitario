@@ -1,0 +1,2 @@
+# Los scripts de Linux deben guardarse con saltos de línea LF para que bash los ejecute.
+*.sh text eol=lf
