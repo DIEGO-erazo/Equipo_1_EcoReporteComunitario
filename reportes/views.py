@@ -12,6 +12,7 @@ from usuarios.models import Usuario
 
 from .forms import CambioEstadoForm, FiltroReportesForm, ReporteForm
 from .models import Estado, Evidencia, ReporteAmbiental
+from .notificaciones import avisar_cambio_de_estado
 
 REPORTES_POR_PAGINA = 9
 
@@ -197,11 +198,15 @@ def cambiar_estado(request, pk):
     form = CambioEstadoForm(request.POST)
     if form.is_valid():
         try:
-            reporte.cambiar_estado(form.cleaned_data['nuevo_estado'], perfil, form.cleaned_data['comentario'])
+            seguimiento = reporte.cambiar_estado(form.cleaned_data['nuevo_estado'], perfil,
+                                                 form.cleaned_data['comentario'])
         except ValidationError as error:
             messages.warning(request, error.messages[0])
         else:
-            messages.success(request, f'Estado actualizado a «{reporte.id_estado}».')
+            texto = f'Estado actualizado a «{reporte.id_estado}».'
+            if avisar_cambio_de_estado(seguimiento, request):
+                texto += f' Se avisó por correo a {reporte.id_usuario.nombre_completo}.'
+            messages.success(request, texto)
     else:
         messages.error(request, 'Selecciona un estado válido.')
     return redirect(reporte)

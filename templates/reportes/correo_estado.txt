@@ -1,0 +1,18 @@
+{% autoescape off %}Hola {{ autor.nombre }}:
+
+El estado de tu reporte «{{ reporte.titulo }}» cambió.
+
+  Antes: {{ seguimiento.id_estado_anterior }}
+  Ahora: {{ seguimiento.id_estado_nuevo }}
+{% if seguimiento.comentario %}
+Comentario de {{ seguimiento.id_usuario_responsable.nombre_completo }}:
+{{ seguimiento.comentario }}
+{% endif %}
+Puedes ver el reporte y todo su historial aquí:
+{{ enlace }}
+
+Gracias por ayudar a cuidar San Rafael.
+
+EcoReporte Comunitario
+San Rafael, Chalatenango
+{% endautoescape %}

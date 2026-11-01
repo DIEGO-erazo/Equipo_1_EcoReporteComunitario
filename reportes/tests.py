@@ -1,8 +1,11 @@
 import shutil
+import smtplib
 import tempfile
 from io import BytesIO
+from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
@@ -234,3 +237,42 @@ class MapaTest(BaseReportesTest):
         respuesta = self.client.get(reverse('reportes:crear'))
         self.assertContains(respuesta, 'id="mapa-elegir"')
         self.assertContains(respuesta, 'id="mapa-config"')
+
+
+class AvisoPorCorreoTest(BaseReportesTest):
+    def cambiar(self, reporte, comentario='Se coordinó la limpieza'):
+        self.ingresar(self.admin)
+        return self.client.post(reverse('reportes:cambiar_estado', args=[reporte.pk]),
+                                {'nuevo_estado': self.resuelto.pk, 'comentario': comentario}, follow=True)
+
+    def test_avisa_al_autor_cuando_cambia_el_estado(self):
+        reporte = self.crear_reporte()
+        respuesta = self.cambiar(reporte)
+        self.assertEqual(len(mail.outbox), 1)
+        correo = mail.outbox[0]
+        self.assertEqual(correo.to, ['vecino@test.com'])
+        self.assertEqual(correo.subject, 'Tu reporte «Basura en la calle» ahora está: Resuelto')
+        self.assertIn('Antes: Pendiente', correo.body)
+        self.assertIn('Ahora: Resuelto', correo.body)
+        self.assertIn('Se coordinó la limpieza', correo.body)
+        self.assertIn(f'https://testserver{reporte.get_absolute_url()}', correo.body)
+        self.assertContains(respuesta, 'Se avisó por correo a Ana Pérez.')
+
+    def test_no_avisa_si_el_administrador_cambia_su_propio_reporte(self):
+        self.cambiar(self.crear_reporte(usuario=self.admin))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_no_avisa_a_cuentas_sin_correo_real(self):
+        sin_correo = Usuario.para_cuenta(get_user_model().objects.create_user(username='sincorreo', password='x'))
+        self.cambiar(self.crear_reporte(usuario=sin_correo))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_si_falla_el_correo_el_estado_igual_cambia(self):
+        reporte = self.crear_reporte()
+        with mock.patch('reportes.notificaciones.send_mail', side_effect=smtplib.SMTPException('caído')), \
+                self.assertLogs('reportes.notificaciones', 'ERROR'):
+            respuesta = self.cambiar(reporte)
+        reporte.refresh_from_db()
+        self.assertEqual(reporte.id_estado, self.resuelto)
+        self.assertContains(respuesta, 'Estado actualizado a «Resuelto».')
+        self.assertNotContains(respuesta, 'Se avisó por correo')
