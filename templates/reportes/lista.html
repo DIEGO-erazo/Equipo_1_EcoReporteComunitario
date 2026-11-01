@@ -1,23 +1,36 @@
 {% extends "base.html" %}
+{% load interfaz %}
 {% block titulo %}Reportes{% endblock %}
 {% block contenido %}
-<div class="encabezado-seccion">
-  <h1>Reportes de la comunidad</h1>
-  <a class="boton" href="{% url 'reportes:crear' %}">+ Nuevo reporte</a>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 mb-0">Reportes de la comunidad</h1>
+  <a class="btn btn-primary" href="{% url 'reportes:crear' %}">+ Nuevo reporte</a>
 </div>
 
-<form method="get" class="filtros">
-  {{ filtro.q }} {{ filtro.categoria }} {{ filtro.estado }}
-  <button type="submit" class="boton">Buscar</button>
-  {% if request.GET %}<a href="{% url 'reportes:lista' %}">Limpiar</a>{% endif %}
+<form method="get" class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <div class="row g-2">
+      <div class="col-12 col-md-5">
+        <label class="visually-hidden" for="{{ filtro.q.id_for_label }}">Buscar</label>{{ filtro.q|bootstrap }}
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="visually-hidden" for="{{ filtro.categoria.id_for_label }}">Categoría</label>{{ filtro.categoria|bootstrap }}
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="visually-hidden" for="{{ filtro.estado.id_for_label }}">Estado</label>{{ filtro.estado|bootstrap }}
+      </div>
+      <div class="col-12 col-md-2 d-grid"><button type="submit" class="btn btn-primary">Buscar</button></div>
+    </div>
+    {% if request.GET %}<a class="d-inline-block mt-2 small" href="{% url 'reportes:lista' %}">Limpiar filtros</a>{% endif %}
+  </div>
 </form>
 
-<p class="resultado">{{ pagina.paginator.count }} reporte{{ pagina.paginator.count|pluralize }} encontrado{{ pagina.paginator.count|pluralize }}</p>
+<p class="text-body-secondary">{{ pagina.paginator.count }} reporte{{ pagina.paginator.count|pluralize }} encontrado{{ pagina.paginator.count|pluralize }}</p>
 
 {% if pagina.object_list %}
-  <div class="rejilla">{% for reporte in pagina %}{% include "parciales/tarjeta_reporte.html" %}{% endfor %}</div>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">{% for reporte in pagina %}{% include "parciales/tarjeta_reporte.html" %}{% endfor %}</div>
   {% include "parciales/paginacion.html" %}
 {% else %}
-  <p class="vacio">No se encontraron reportes con esos filtros.</p>
+  <p class="text-body-secondary fst-italic">No se encontraron reportes con esos filtros.</p>
 {% endif %}
 {% endblock %}

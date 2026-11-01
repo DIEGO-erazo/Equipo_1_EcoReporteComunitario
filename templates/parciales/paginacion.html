@@ -1,7 +1,17 @@
 {% if pagina.paginator.num_pages > 1 %}
-<nav class="paginacion" aria-label="Paginación">
-  {% if pagina.has_previous %}<a class="boton boton-secundario" href="?{% if parametros %}{{ parametros }}&{% endif %}pagina={{ pagina.previous_page_number }}">← Anterior</a>{% endif %}
-  <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
-  {% if pagina.has_next %}<a class="boton boton-secundario" href="?{% if parametros %}{{ parametros }}&{% endif %}pagina={{ pagina.next_page_number }}">Siguiente →</a>{% endif %}
+<nav aria-label="Paginación" class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if pagina.has_previous %}
+      <li class="page-item"><a class="page-link" href="?{% if parametros %}{{ parametros }}&{% endif %}pagina={{ pagina.previous_page_number }}">← Anterior</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">← Anterior</span></li>
+    {% endif %}
+    <li class="page-item active" aria-current="page"><span class="page-link">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span></li>
+    {% if pagina.has_next %}
+      <li class="page-item"><a class="page-link" href="?{% if parametros %}{{ parametros }}&{% endif %}pagina={{ pagina.next_page_number }}">Siguiente →</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Siguiente →</span></li>
+    {% endif %}
+  </ul>
 </nav>
 {% endif %}

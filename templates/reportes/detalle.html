@@ -1,68 +1,86 @@
 {% extends "base.html" %}
 {% block titulo %}{{ reporte.titulo }}{% endblock %}
 {% block contenido %}
-<p><a href="{% url 'reportes:lista' %}">← Volver a los reportes</a></p>
+<nav aria-label="Ruta de navegación">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'inicio' %}">Inicio</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'reportes:lista' %}">Reportes</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Reporte #{{ reporte.pk }}</li>
+  </ol>
+</nav>
 
-<div class="detalle">
-  <article class="panel">
-    <div class="etiquetas">
-      <span class="etiqueta estado-{{ reporte.id_estado.clase_css }}">{{ reporte.id_estado }}</span>
-      <span class="etiqueta categoria">{{ reporte.id_categoria }}</span>
+<div class="row g-4">
+  <article class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex flex-wrap gap-1 mb-2">
+          {% include "parciales/etiqueta_estado.html" with estado=reporte.id_estado %}
+          <span class="badge rounded-pill text-bg-light border">{{ reporte.id_categoria }}</span>
+        </div>
+        <h1 class="h3">{{ reporte.titulo }}</h1>
+        <p class="small text-body-secondary mb-2">Reporte #{{ reporte.pk }} · por {{ reporte.id_usuario.nombre_completo }} · {{ reporte.fecha_reporte|date:"j \d\e F \d\e Y, H:i" }}</p>
+        <p class="text-body-secondary">📍 {{ reporte.ubicacion_direccion }}
+          {% if reporte.latitud is not None and reporte.longitud is not None %}
+            · <a href="https://www.openstreetmap.org/?mlat={{ reporte.latitud|stringformat:'f' }}&mlon={{ reporte.longitud|stringformat:'f' }}#map=18/{{ reporte.latitud|stringformat:'f' }}/{{ reporte.longitud|stringformat:'f' }}" target="_blank" rel="noopener">Ver en el mapa</a>
+          {% endif %}
+        </p>
+        <div class="my-3">{{ reporte.descripcion|linebreaks }}</div>
+
+        {% if evidencias %}
+          <h2 class="h5">Evidencias</h2>
+          <div class="row row-cols-2 row-cols-md-3 g-2">
+            {% for evidencia in evidencias %}
+              <div class="col">
+                <a href="{{ evidencia.url_imagen.url }}" target="_blank" rel="noopener">
+                  <img src="{{ evidencia.url_imagen.url }}" class="img-fluid rounded foto-evidencia" alt="Evidencia {{ forloop.counter }}" loading="lazy">
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if puede_editar %}
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <a class="btn btn-outline-primary" href="{% url 'reportes:editar' reporte.pk %}">Editar</a>
+            <a class="btn btn-danger" href="{% url 'reportes:eliminar' reporte.pk %}">Eliminar</a>
+          </div>
+        {% endif %}
+      </div>
     </div>
-    <h1>{{ reporte.titulo }}</h1>
-    <p class="meta">Reporte #{{ reporte.pk }} · por {{ reporte.id_usuario.nombre_completo }} · {{ reporte.fecha_reporte|date:"j \d\e F \d\e Y, H:i" }}</p>
-    <p class="lugar">📍 {{ reporte.ubicacion_direccion }}
-      {% if reporte.latitud is not None and reporte.longitud is not None %}
-        · <a href="https://www.openstreetmap.org/?mlat={{ reporte.latitud|stringformat:'f' }}&mlon={{ reporte.longitud|stringformat:'f' }}#map=18/{{ reporte.latitud|stringformat:'f' }}/{{ reporte.longitud|stringformat:'f' }}" target="_blank" rel="noopener">Ver en el mapa</a>
-      {% endif %}
-    </p>
-    <div class="descripcion">{{ reporte.descripcion|linebreaks }}</div>
-
-    {% if evidencias %}
-      <h2>Evidencias</h2>
-      <div class="galeria">
-        {% for evidencia in evidencias %}
-          <a href="{{ evidencia.url_imagen.url }}" target="_blank" rel="noopener"><img src="{{ evidencia.url_imagen.url }}" alt="Evidencia {{ forloop.counter }}" loading="lazy"></a>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    {% if puede_editar %}
-      <div class="acciones">
-        <a class="boton boton-secundario" href="{% url 'reportes:editar' reporte.pk %}">Editar</a>
-        <a class="boton boton-peligro" href="{% url 'reportes:eliminar' reporte.pk %}">Eliminar</a>
-      </div>
-    {% endif %}
   </article>
 
-  <aside>
+  <aside class="col-lg-4">
     {% if es_administrador %}
-      <div class="panel">
-        <h2>Actualizar estado</h2>
-        <form method="post" action="{% url 'reportes:cambiar_estado' reporte.pk %}">
-          {% csrf_token %}
-          {% with form=form_estado %}{% include "parciales/formulario.html" %}{% endwith %}
-          <button type="submit" class="boton">Guardar estado</button>
-        </form>
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="h5">Actualizar estado</h2>
+          <form method="post" action="{% url 'reportes:cambiar_estado' reporte.pk %}">
+            {% csrf_token %}
+            {% with form=form_estado %}{% include "parciales/formulario.html" %}{% endwith %}
+            <button type="submit" class="btn btn-primary w-100">Guardar estado</button>
+          </form>
+        </div>
       </div>
     {% endif %}
 
-    <div class="panel">
-      <h2>Seguimiento</h2>
-      {% if seguimientos %}
-        <ol class="linea-tiempo">
-          {% for s in seguimientos %}
-            <li>
-              <span class="etiqueta estado-{{ s.id_estado_nuevo.clase_css }}">{{ s.id_estado_nuevo }}</span>
-              <small>{{ s.fecha_cambio|date:"j M Y, H:i" }} · {{ s.id_usuario_responsable.nombre_completo }}</small>
-              <small>De «{{ s.id_estado_anterior }}» a «{{ s.id_estado_nuevo }}»</small>
-              {% if s.comentario %}<p>{{ s.comentario }}</p>{% endif %}
-            </li>
-          {% endfor %}
-        </ol>
-      {% else %}
-        <p class="vacio">Este reporte aún no tiene actualizaciones.</p>
-      {% endif %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Seguimiento</h2>
+        {% if seguimientos %}
+          <ol class="linea-tiempo">
+            {% for s in seguimientos %}
+              <li>
+                {% include "parciales/etiqueta_estado.html" with estado=s.id_estado_nuevo %}
+                <small>{{ s.fecha_cambio|date:"j M Y, H:i" }} · {{ s.id_usuario_responsable.nombre_completo }}</small>
+                <small>De «{{ s.id_estado_anterior }}» a «{{ s.id_estado_nuevo }}»</small>
+                {% if s.comentario %}<p>{{ s.comentario }}</p>{% endif %}
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p class="text-body-secondary fst-italic mb-0">Este reporte aún no tiene actualizaciones.</p>
+        {% endif %}
+      </div>
     </div>
   </aside>
 </div>

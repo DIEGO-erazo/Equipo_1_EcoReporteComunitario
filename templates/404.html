@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block titulo %}Página no encontrada{% endblock %}
 {% block contenido %}
-<div class="panel formulario-angosto"><h1>Página no encontrada</h1><p>Lo que buscas no existe o fue eliminado.</p><a class="boton" href="{% url 'inicio' %}">Ir al inicio</a></div>
+<div class="card border-0 shadow-sm formulario-angosto text-center">
+  <div class="card-body p-4">
+    <p class="display-4 fw-bold text-primary mb-0">404</p>
+    <h1 class="h4">Página no encontrada</h1>
+    <p>Lo que buscas no existe o fue eliminado.</p>
+    <a class="btn btn-primary" href="{% url 'inicio' %}">Ir al inicio</a>
+  </div>
+</div>
 {% endblock %}

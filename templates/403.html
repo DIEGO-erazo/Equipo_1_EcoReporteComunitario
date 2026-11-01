@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block titulo %}Acceso denegado{% endblock %}
 {% block contenido %}
-<div class="panel formulario-angosto"><h1>Acceso denegado</h1><p>No tienes permiso para realizar esta acción.</p><a class="boton" href="{% url 'inicio' %}">Ir al inicio</a></div>
+<div class="card border-0 shadow-sm formulario-angosto text-center">
+  <div class="card-body p-4">
+    <p class="display-4 fw-bold text-danger mb-0">403</p>
+    <h1 class="h4">Acceso denegado</h1>
+    <p>No tienes permiso para realizar esta acción.</p>
+    <a class="btn btn-primary" href="{% url 'inicio' %}">Ir al inicio</a>
+  </div>
+</div>
 {% endblock %}

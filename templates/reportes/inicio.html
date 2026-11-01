@@ -1,43 +1,47 @@
 {% extends "base.html" %}
 {% block titulo %}Inicio{% endblock %}
 {% block contenido %}
-<section class="portada">
-  <div>
-    <h1>Juntos por una San Rafael más limpia</h1>
-    <p>Reporta botaderos clandestinos, acumulación de basura y problemas con la recolección de residuos.
-       Da seguimiento a cada caso hasta que se resuelva.</p>
-    <div class="acciones">
-      <a class="boton" href="{% url 'reportes:crear' %}">Hacer un reporte</a>
-      <a class="boton boton-secundario" href="{% url 'reportes:lista' %}">Ver reportes</a>
-    </div>
+<section class="portada rounded-4 text-white p-4 p-md-5 mb-4">
+  <h1 class="display-6 fw-bold">Juntos por una San Rafael más limpia</h1>
+  <p class="lead col-lg-8">Reporta botaderos clandestinos, acumulación de basura y problemas con la recolección de residuos.
+     Da seguimiento a cada caso hasta que se resuelva.</p>
+  <div class="d-flex flex-wrap gap-2 mt-3">
+    <a class="btn btn-light btn-lg text-primary fw-semibold" href="{% url 'reportes:crear' %}">Hacer un reporte</a>
+    <a class="btn btn-outline-light btn-lg" href="{% url 'reportes:lista' %}">Ver reportes</a>
   </div>
 </section>
 
-<section class="estadisticas">
-  <div class="estadistica"><span class="numero">{{ total_reportes }}</span><span>Reportes</span></div>
-  <div class="estadistica estado-pendiente"><span class="numero">{{ total_pendientes }}</span><span>Pendientes</span></div>
-  <div class="estadistica estado-proceso"><span class="numero">{{ total_en_proceso }}</span><span>En proceso</span></div>
-  <div class="estadistica estado-resuelto"><span class="numero">{{ total_resueltos }}</span><span>Resueltos</span></div>
+<section class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+  <div class="col"><div class="card border-0 shadow-sm text-center h-100 estadistica"><div class="card-body">
+    <span class="d-block display-6 fw-bold">{{ total_reportes }}</span>Reportes</div></div></div>
+  <div class="col"><div class="card border-0 shadow-sm text-center h-100 estadistica estado-pendiente"><div class="card-body">
+    <span class="d-block display-6 fw-bold">{{ total_pendientes }}</span>Pendientes</div></div></div>
+  <div class="col"><div class="card border-0 shadow-sm text-center h-100 estadistica estado-proceso"><div class="card-body">
+    <span class="d-block display-6 fw-bold">{{ total_en_proceso }}</span>En proceso</div></div></div>
+  <div class="col"><div class="card border-0 shadow-sm text-center h-100 estadistica estado-resuelto"><div class="card-body">
+    <span class="d-block display-6 fw-bold">{{ total_resueltos }}</span>Resueltos</div></div></div>
 </section>
 
-<section>
-  <div class="encabezado-seccion">
-    <h2>Reportes recientes</h2>
+<section class="mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h2 class="h4 mb-0">Reportes recientes</h2>
     <a href="{% url 'reportes:lista' %}">Ver todos →</a>
   </div>
   {% if recientes %}
-    <div class="rejilla">{% for reporte in recientes %}{% include "parciales/tarjeta_reporte.html" %}{% endfor %}</div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">{% for reporte in recientes %}{% include "parciales/tarjeta_reporte.html" %}{% endfor %}</div>
   {% else %}
-    <p class="vacio">Aún no hay reportes. ¡Sé la primera persona en reportar un problema!</p>
+    <p class="text-body-secondary fst-italic">Aún no hay reportes. ¡Sé la primera persona en reportar un problema!</p>
   {% endif %}
 </section>
 
-<section class="pasos">
-  <h2>¿Cómo funciona?</h2>
-  <ol>
-    <li><strong>Crea tu cuenta</strong> con tu correo.</li>
-    <li><strong>Reporta</strong> el problema con una descripción, el lugar y fotos.</li>
-    <li><strong>Da seguimiento</strong>: los responsables actualizan el estado del caso.</li>
-  </ol>
+<section class="card border-0 shadow-sm">
+  <div class="card-body p-4">
+    <h2 class="h4">¿Cómo funciona?</h2>
+    <div class="row g-3 mt-1">
+      <div class="col-md-4"><div class="paso"><span class="paso-numero">1</span><span><strong>Crea tu cuenta</strong> con tu correo o con Google.</span></div></div>
+      <div class="col-md-4"><div class="paso"><span class="paso-numero">2</span><span><strong>Reporta</strong> el problema con una descripción, el lugar y fotos.</span></div></div>
+      <div class="col-md-4"><div class="paso"><span class="paso-numero">3</span><span><strong>Da seguimiento</strong>: los responsables actualizan el estado del caso.</span></div></div>
+    </div>
+  </div>
 </section>
 {% endblock %}
