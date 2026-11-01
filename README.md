@@ -52,9 +52,11 @@ Equipo_1_EcoReporteComunitario/
 ├── config/                  # Configuración de Django (settings, urls, wsgi)
 ├── usuarios/                # Registro, inicio de sesión, perfil y roles
 ├── reportes/                # Reportes, categorías, estados, evidencias y seguimiento
-│   └── management/commands/cargar_datos_iniciales.py
-├── templates/               # Páginas HTML
-├── static/                  # Estilos (CSS) e imágenes
+│   ├── management/commands/cargar_datos_iniciales.py
+│   └── templatetags/interfaz.py  # Filtro que aplica las clases de Bootstrap a los formularios
+├── gestion/                 # Panel para administradores: categorías, estados y usuarios
+├── templates/               # Páginas HTML (base.html, parciales/ y una carpeta por app)
+├── static/                  # Estilos (CSS), imágenes y Bootstrap 5.3 (static/vendor/)
 ├── docker/                  # Scripts usados por el contenedor
 ├── documentacion/           # Documentos de las tareas del curso
 ├── Dockerfile
@@ -73,8 +75,32 @@ Equipo_1_EcoReporteComunitario/
 - **Búsqueda y filtros:** por texto, categoría y estado, con paginación.
 - **Seguimiento:** los administradores cambian el estado (Pendiente, En proceso, Resuelto, Rechazado) con un comentario; cada cambio queda en el historial del reporte.
 - **Roles y permisos:** cada ciudadano solo puede editar sus propios reportes; los administradores pueden gestionar todos.
+- **Gestión (solo administradores):** panel con estadísticas y CRUD de categorías, estados y usuarios
+  (cambiar rol, desactivar o eliminar cuentas) sin entrar al panel de Django. No se puede eliminar una
+  categoría o estado que tenga reportes, ni renombrar los cuatro estados que usa el sistema.
 - **Inicio con estadísticas** y panel de administración de Django en `/admin/`.
-- Diseño adaptable a teléfonos.
+- **Interfaz con Bootstrap 5.3**, adaptable a teléfonos (menú desplegable, tablas y tarjetas responsivas).
+  Bootstrap va incluido en el proyecto, así que el sitio se ve bien aunque no haya internet.
+
+### Rutas principales
+
+| URL | Nombre | Qué hace | Quién |
+|---|---|---|---|
+| `/` | `inicio` | Portada con estadísticas y reportes recientes | Todos |
+| `/reportes/` | `reportes:lista` | Lista con búsqueda, filtros y paginación | Todos |
+| `/reportes/<id>/` | `reportes:detalle` | Detalle, fotos e historial de seguimiento | Todos |
+| `/reportes/nuevo/` | `reportes:crear` | Registrar un reporte con fotos | Con sesión |
+| `/reportes/<id>/editar/` | `reportes:editar` | Modificar un reporte | Autor o administrador |
+| `/reportes/<id>/eliminar/` | `reportes:eliminar` | Eliminar un reporte (pide confirmación) | Autor o administrador |
+| `/reportes/<id>/estado/` | `reportes:cambiar_estado` | Cambiar el estado con un comentario | Administrador |
+| `/reportes/mios/` | `reportes:mis_reportes` | Reportes de la persona conectada | Con sesión |
+| `/ingresar/`, `/salir/` | `login`, `logout` | Iniciar y cerrar sesión | Todos |
+| `/usuarios/registro/` | `usuarios:registro` | Crear cuenta | Todos |
+| `/usuarios/perfil/` | `usuarios:perfil` | Ver y editar el perfil | Con sesión |
+| `/gestion/` | `gestion:panel` | Panel con estadísticas | Administrador |
+| `/gestion/categorias/` | `gestion:categorias` (+ `_crear`, `_editar`, `_eliminar`) | CRUD de categorías | Administrador |
+| `/gestion/estados/` | `gestion:estados` (+ `_crear`, `_editar`, `_eliminar`) | CRUD de estados | Administrador |
+| `/gestion/usuarios/` | `gestion:usuarios` (+ `_editar`, `_eliminar`) | Buscar, editar y eliminar usuarios | Administrador |
 
 ## 7. Cómo ejecutar el proyecto
 
