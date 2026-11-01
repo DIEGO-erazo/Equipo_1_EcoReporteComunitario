@@ -123,6 +123,19 @@ class VistasPublicasTest(BaseReportesTest):
         respuesta = self.client.get(reverse('reportes:crear'))
         self.assertRedirects(respuesta, f"{reverse('login')}?next={reverse('reportes:crear')}")
 
+    def test_paginas_usan_bootstrap(self):
+        respuesta = self.client.get(reverse('reportes:lista'))
+        self.assertContains(respuesta, 'vendor/bootstrap/bootstrap.min.css')
+        self.assertContains(respuesta, 'vendor/bootstrap/bootstrap.bundle.min.js')
+        self.assertContains(respuesta, 'class="navbar ')
+        self.assertContains(respuesta, 'class="form-select"', count=2)
+
+    def test_formulario_marca_errores_con_bootstrap(self):
+        self.ingresar(self.vecino)
+        respuesta = self.client.post(reverse('reportes:crear'), {'titulo': ''})
+        self.assertContains(respuesta, 'form-control is-invalid')
+        self.assertContains(respuesta, 'invalid-feedback')
+
 
 class CrudReportesTest(BaseReportesTest):
     def test_crear_reporte_con_fotos(self):
