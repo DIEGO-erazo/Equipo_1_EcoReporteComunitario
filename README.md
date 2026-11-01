@@ -70,6 +70,7 @@ Equipo_1_EcoReporteComunitario/
 ## 6. Funcionalidades
 
 - **Cuentas de usuario:** registro con correo, inicio y cierre de sesión, edición del perfil y cambio de contraseña.
+- **Recuperar la contraseña por correo:** enlace "¿Olvidaste tu contraseña?" en la página de ingreso. Para que el servidor envíe los correos, ver [documentacion/recuperar_contrasena.md](documentacion/recuperar_contrasena.md).
 - **Reportes ambientales:** crear, ver, editar y eliminar reportes con título, categoría, descripción, ubicación y coordenadas opcionales (con enlace al mapa).
 - **Evidencias fotográficas:** se pueden subir varias fotos por reporte (máximo 5 MB cada una).
 - **Búsqueda y filtros:** por texto, categoría y estado, con paginación.
@@ -97,6 +98,7 @@ Equipo_1_EcoReporteComunitario/
 | `/ingresar/`, `/salir/` | `login`, `logout` | Iniciar y cerrar sesión | Todos |
 | `/usuarios/registro/` | `usuarios:registro` | Crear cuenta | Todos |
 | `/usuarios/perfil/` | `usuarios:perfil` | Ver y editar el perfil | Con sesión |
+| `/usuarios/recuperar/` | `usuarios:recuperar` (+ `_enviado`, `_confirmar`, `_listo`) | Recuperar la contraseña por correo | Todos |
 | `/gestion/` | `gestion:panel` | Panel con estadísticas | Administrador |
 | `/gestion/categorias/` | `gestion:categorias` (+ `_crear`, `_editar`, `_eliminar`) | CRUD de categorías | Administrador |
 | `/gestion/estados/` | `gestion:estados` (+ `_crear`, `_editar`, `_eliminar`) | CRUD de estados | Administrador |

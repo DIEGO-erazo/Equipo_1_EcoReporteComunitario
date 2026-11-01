@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titulo %}Revisa tu correo{% endblock %}
+{% block contenido %}
+<div class="card border-0 shadow-sm formulario-angosto">
+  <div class="card-body p-4">
+    <h1 class="h3 mb-3">Revisa tu correo</h1>
+    <p>Si hay una cuenta con ese correo, te enviamos un enlace para crear una contraseña nueva.
+       El enlace vence en 24 horas.</p>
+    <ul class="small text-body-secondary">
+      <li>Si no lo ves en unos minutos, revisa la carpeta de spam o correo no deseado.</li>
+      <li>Si entraste con Google, GitHub o Microsoft, no tienes contraseña: usa ese botón para ingresar.</li>
+    </ul>
+    <a class="btn btn-primary w-100" href="{% url 'login' %}">Volver a ingresar</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}Contraseña cambiada{% endblock %}
+{% block contenido %}
+<div class="card border-0 shadow-sm formulario-angosto">
+  <div class="card-body p-4">
+    <h1 class="h3 mb-3">¡Listo!</h1>
+    <p>Tu contraseña fue cambiada. Ya puedes ingresar con la nueva.</p>
+    <a class="btn btn-primary w-100" href="{% url 'login' %}">Ingresar</a>
+  </div>
+</div>
+{% endblock %}

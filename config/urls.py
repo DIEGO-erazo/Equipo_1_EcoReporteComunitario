@@ -25,6 +25,8 @@ urlpatterns = [
     path('cuentas/logout/', RedirectView.as_view(pattern_name='logout'), name='account_logout'),
     path('cuentas/password/change/', RedirectView.as_view(pattern_name='usuarios:cambiar_contrasena'),
          name='account_change_password'),
+    path('cuentas/password/reset/', RedirectView.as_view(pattern_name='usuarios:recuperar'),
+         name='account_reset_password'),
     # Google, GitHub y Microsoft: /cuentas/<proveedor>/login/ y /cuentas/<proveedor>/login/callback/
     path('cuentas/', include('allauth.urls')),
     # Fotos de evidencia subidas por la comunidad.

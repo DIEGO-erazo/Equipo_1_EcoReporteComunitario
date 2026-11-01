@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Recuperar contraseña{% endblock %}
+{% block contenido %}
+<div class="card border-0 shadow-sm formulario-angosto">
+  <div class="card-body p-4">
+    <h1 class="h3 mb-3">Recuperar contraseña</h1>
+    <p>Escribe el correo de tu cuenta y te enviaremos un enlace para crear una contraseña nueva.</p>
+    {% if not correo_configurado %}
+      <div class="alert alert-warning">
+        Por ahora el sitio no puede enviar correos. Pide a un administrador que te ayude a recuperar tu cuenta.
+      </div>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      {% include "parciales/formulario.html" %}
+      <button type="submit" class="btn btn-primary w-100 mb-3">Enviar enlace</button>
+    </form>
+    <p class="mb-0 text-center"><a href="{% url 'login' %}">Volver a ingresar</a></p>
+  </div>
+</div>
+{% endblock %}
