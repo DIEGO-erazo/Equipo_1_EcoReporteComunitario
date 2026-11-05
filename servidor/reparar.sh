@@ -8,21 +8,44 @@ PROYECTO="$(pwd)"
 USUARIO="$(whoami)"
 PROBLEMAS=0
 
-ok()   { echo "  [OK]    $*"; }
-mal()  { echo "  [FALLA] $*"; PROBLEMAS=$((PROBLEMAS + 1)); }
+ok()    { echo "  [OK]    $*"; }
+mal()   { echo "  [FALLA] $*"; PROBLEMAS=$((PROBLEMAS + 1)); }
 hecho() { echo "  [ARREGLADO] $*"; }
+
+# Pone valores en el .env (CLAVE=valor ...) sin tocar las demás líneas.
+# Imprime las claves que cambió.
+ajustar_env() {
+    python3 - "$@" <<'PY'
+import sys
+from pathlib import Path
+
+env = Path(".env")
+nuevos = dict(par.split("=", 1) for par in sys.argv[1:])
+lineas, cambiadas = [], []
+for linea in (env.read_text().splitlines() if env.exists() else []):
+    clave = linea.split("=", 1)[0].strip()
+    if clave in nuevos:
+        valor = nuevos.pop(clave)
+        if linea != f"{clave}={valor}":
+            cambiadas.append(clave)
+        linea = f"{clave}={valor}"
+    lineas.append(linea)
+for clave, valor in nuevos.items():
+    lineas.append(f"{clave}={valor}")
+    cambiadas.append(clave)
+env.write_text("\n".join(lineas) + "\n")
+env.chmod(0o600)
+print(" ".join(cambiadas))
+PY
+}
 
 if [ "$USUARIO" = "root" ]; then
     echo "Ejecuta este script con tu usuario normal (sin sudo); él pedirá la contraseña cuando la necesite."
     exit 1
 fi
-if [ ! -f .env ]; then
-    echo "No hay .env: este servidor nunca se instaló. Ejecuta primero:  bash servidor/instalar_servidor.sh"
-    exit 1
-fi
 sudo -v || exit 1
 
-echo "== 1/6 Internet =="
+echo "== 1/7 Internet =="
 if curl -fsS -o /dev/null --max-time 15 https://github.com; then
     ok "Hay conexión a internet."
 else
@@ -53,7 +76,7 @@ if command -v nmcli > /dev/null; then
     fi
 fi
 
-echo "== 2/6 Código y dependencias =="
+echo "== 2/7 Código y dependencias =="
 RAMA="$(git rev-parse --abbrev-ref HEAD)"
 if git fetch -q origin "$RAMA" && git merge -q --ff-only "origin/$RAMA"; then
     ok "Código al día con GitHub (rama $RAMA, commit $(git rev-parse --short HEAD))."
@@ -76,7 +99,63 @@ else
     mal "Falló la instalación de dependencias o la base de datos (mira el error de arriba)."
 fi
 
-echo "== 3/6 Aplicación (gunicorn) =="
+echo "== 3/7 Configuración de producción (.env) =="
+# El servidor nunca debe mostrar la página amarilla de errores (DEBUG) a los visitantes,
+# y necesita una clave secreta propia, no la de ejemplo.
+CLAVE_ACTUAL="$(grep -oP '^SECRET_KEY=\K.+' .env 2> /dev/null || true)"
+VALORES=(DEBUG=False DETRAS_DE_PROXY=True)
+if [ "${#CLAVE_ACTUAL}" -lt 40 ] || [[ "$CLAVE_ACTUAL" == django-insecure* ]]; then
+    VALORES+=("SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')")
+fi
+CAMBIOS="$(ajustar_env "${VALORES[@]}")"
+if [ -n "$CAMBIOS" ]; then
+    hecho "El .env quedó en modo producción (se cambió: $CAMBIOS)."
+else
+    ok "El .env ya estaba en modo producción."
+fi
+
+echo "== 4/7 Tailscale y dirección fija =="
+DIRECCION=""
+if command -v tailscale > /dev/null; then
+    sudo systemctl enable -q --now tailscaled
+    if ! tailscale status > /dev/null 2>&1; then
+        echo "  Tailscale está desconectado. Si aparece un enlace, ábrelo en el navegador e inicia sesión."
+        sudo tailscale up --hostname=ecoreporte
+    fi
+    if tailscale status > /dev/null 2>&1; then
+        ok "Tailscale conectado."
+        sudo timeout 120 tailscale funnel --bg 8000 > /dev/null
+        if sudo tailscale funnel status 2> /dev/null | grep -q 'Funnel on'; then
+            ok "Funnel encendido."
+        else
+            mal "El Funnel no se pudo encender. Ejecuta  sudo tailscale funnel 8000  y abre el enlace que muestre."
+        fi
+        # La app solo acepta visitas a las direcciones anotadas en el .env.
+        DOMINIO="$(tailscale status --json | python3 -c 'import json, sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))')"
+        DIRECCION="https://$DOMINIO"
+        CAMBIOS="$(ajustar_env "ALLOWED_HOSTS=localhost,127.0.0.1,$DOMINIO" \
+            "CSRF_TRUSTED_ORIGINS=$DIRECCION" "DIRECCION_FIJA=$DIRECCION")"
+        if [ -n "$CAMBIOS" ]; then
+            hecho "La app ahora acepta la dirección $DIRECCION"
+        else
+            ok "La app acepta la dirección $DIRECCION"
+        fi
+        # Con dirección fija, el túnel temporal de Cloudflare sobra.
+        sudo systemctl disable -q --now ecoreporte-tunel.service 2> /dev/null || true
+    else
+        mal "Tailscale sigue desconectado. Ejecuta  sudo tailscale up  e inicia sesión con el enlace."
+    fi
+elif systemctl list-unit-files ecoreporte-tunel.service > /dev/null 2>&1; then
+    echo "  Este servidor usa el túnel temporal de Cloudflare."
+    ajustar_env "ALLOWED_HOSTS=localhost,127.0.0.1,.trycloudflare.com" \
+        "CSRF_TRUSTED_ORIGINS=https://*.trycloudflare.com" > /dev/null
+    sudo systemctl enable -q --now ecoreporte-tunel.service && sudo systemctl restart ecoreporte-tunel.service
+    ok "Túnel reiniciado. Su dirección:  bash servidor/ver_direccion.sh"
+else
+    mal "No hay forma de abrir la página desde internet. Ejecuta:  bash servidor/usar_direccion_fija.sh"
+fi
+
+echo "== 5/7 Aplicación (gunicorn) =="
 sudo tee /etc/systemd/system/ecoreporte.service > /dev/null <<EOF
 [Unit]
 Description=EcoReporte Comunitario (Django + gunicorn)
@@ -96,6 +175,7 @@ WantedBy=multi-user.target
 EOF
 sudo systemctl daemon-reload
 sudo systemctl enable -q ecoreporte.service
+# Reinicia para que lea el .env actualizado.
 sudo systemctl restart ecoreporte.service
 
 RESPONDE=""
@@ -110,62 +190,7 @@ else
     sudo journalctl -u ecoreporte -n 25 --no-pager
 fi
 
-echo "== 4/6 Tailscale y dirección fija =="
-DIRECCION_FIJA="$(grep -oP '^DIRECCION_FIJA=\K.+' .env || true)"
-if [ -z "$DIRECCION_FIJA" ]; then
-    echo "  Este servidor usa el túnel temporal de Cloudflare."
-    sudo systemctl enable -q --now ecoreporte-tunel.service 2> /dev/null && sudo systemctl restart ecoreporte-tunel.service
-    ok "Túnel reiniciado. Su dirección:  bash servidor/ver_direccion.sh"
-elif ! command -v tailscale > /dev/null; then
-    mal "Tailscale no está instalado. Ejecuta:  bash servidor/usar_direccion_fija.sh"
-else
-    sudo systemctl enable -q --now tailscaled
-    if ! tailscale status > /dev/null 2>&1; then
-        echo "  Tailscale está desconectado. Si aparece un enlace, ábrelo en el navegador e inicia sesión."
-        sudo tailscale up --hostname=ecoreporte
-    fi
-    if tailscale status > /dev/null 2>&1; then
-        ok "Tailscale conectado."
-        sudo timeout 120 tailscale funnel --bg 8000 > /dev/null
-        if sudo tailscale funnel status 2> /dev/null | grep -q 'Funnel on'; then
-            ok "Funnel encendido."
-        else
-            mal "El Funnel no se pudo encender. Ejecuta  sudo tailscale funnel 8000  y abre el enlace que muestre."
-        fi
-
-        # La app solo acepta visitas a las direcciones anotadas en el .env.
-        DOMINIO="$(tailscale status --json | .venv/bin/python -c 'import json, sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))')"
-        if [ -n "$DOMINIO" ] && [ "$DIRECCION_FIJA" != "https://$DOMINIO" ]; then
-            .venv/bin/python - "$DOMINIO" <<'EOF'
-import sys
-from pathlib import Path
-
-dominio = sys.argv[1]
-env = Path(".env")
-valores = {
-    "ALLOWED_HOSTS": f"localhost,127.0.0.1,{dominio}",
-    "CSRF_TRUSTED_ORIGINS": f"https://{dominio}",
-    "DIRECCION_FIJA": f"https://{dominio}",
-}
-lineas = []
-for linea in env.read_text().splitlines():
-    clave = linea.split("=", 1)[0]
-    if clave in valores:
-        linea = f"{clave}={valores.pop(clave)}"
-    lineas.append(linea)
-lineas += [f"{clave}={valor}" for clave, valor in valores.items()]
-env.write_text("\n".join(lineas) + "\n")
-EOF
-            DIRECCION_FIJA="https://$DOMINIO"
-            sudo systemctl restart ecoreporte.service
-            hecho "La dirección cambió; el .env ahora usa $DIRECCION_FIJA"
-        fi
-    else
-        mal "Tailscale sigue desconectado. Ejecuta  sudo tailscale up  e inicia sesión con el enlace."
-    fi
-fi
-
-echo "== 5/6 Arranque automático =="
+echo "== 6/7 Arranque automático =="
 sudo tee /etc/systemd/system/ecoreporte-vigilar.service > /dev/null <<EOF
 [Unit]
 Description=Revisa que EcoReporte y su dirección pública sigan funcionando
@@ -202,18 +227,20 @@ for servicio in ecoreporte.service ecoreporte-vigilar.timer ecoreporte-actualiza
     fi
 done
 
-echo "== 6/6 Prueba desde internet =="
-if [ -n "$DIRECCION_FIJA" ]; then
-    PUBLICA=""
+echo "== 7/7 Prueba desde internet =="
+if [ -n "$DIRECCION" ]; then
+    CODIGO=""
     for _ in $(seq 1 10); do
-        curl -fsS -o /dev/null --max-time 10 "$DIRECCION_FIJA/" && PUBLICA=1 && break
+        CODIGO="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$DIRECCION/")"
+        [ "$CODIGO" = "200" ] && break
         sleep 3
     done
-    if [ -n "$PUBLICA" ]; then
-        ok "La página abre desde internet: $DIRECCION_FIJA"
-    else
-        mal "Todavía no abre desde internet. Espera 2 minutos y prueba $DIRECCION_FIJA en el celular."
-    fi
+    case "$CODIGO" in
+        200) ok "La página abre desde internet: $DIRECCION" ;;
+        000) mal "Todavía no abre desde internet. Espera 2 minutos y prueba $DIRECCION en el celular." ;;
+        *)   mal "La dirección responde con un error $CODIGO. Últimas líneas del registro:"
+             sudo journalctl -u ecoreporte -n 25 --no-pager ;;
+    esac
 fi
 
 echo
