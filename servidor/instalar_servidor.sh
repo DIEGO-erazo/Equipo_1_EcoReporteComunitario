@@ -87,6 +87,8 @@ sudo tee /etc/systemd/system/ecoreporte.service > /dev/null <<EOF
 [Unit]
 Description=EcoReporte Comunitario (Django + gunicorn)
 After=network.target
+# Nunca deja de reintentar, aunque falle varias veces seguidas.
+StartLimitIntervalSec=0
 
 [Service]
 User=$USUARIO
@@ -185,8 +187,31 @@ OnUnitActiveSec=2min
 WantedBy=timers.target
 EOF
 
+# Cada 3 minutos revisa que la página responda y que el Funnel siga encendido (servidor/vigilar.sh).
+sudo tee /etc/systemd/system/ecoreporte-vigilar.service > /dev/null <<EOF
+[Unit]
+Description=Revisa que EcoReporte y su dirección pública sigan funcionando
+After=network-online.target ecoreporte.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash $PROYECTO/servidor/vigilar.sh
+EOF
+
+sudo tee /etc/systemd/system/ecoreporte-vigilar.timer > /dev/null <<EOF
+[Unit]
+Description=Revisa EcoReporte cada 3 minutos
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=3min
+
+[Install]
+WantedBy=timers.target
+EOF
+
 sudo systemctl daemon-reload
-sudo systemctl enable --now ecoreporte-actualizar.timer
+sudo systemctl enable --now ecoreporte-actualizar.timer ecoreporte-vigilar.timer
 
 if [ -n "$DIRECCION_FIJA" ]; then
     echo

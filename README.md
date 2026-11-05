@@ -207,6 +207,13 @@ La dirección gratuita (`*.trycloudflare.com`) cambia cada vez que se reinicia l
 bash servidor/usar_direccion_fija.sh   # pide iniciar sesión en Tailscale y activar Funnel
 ```
 
+Cada 3 minutos un vigilante (`servidor/vigilar.sh`) reinicia la app si no responde y vuelve a
+encender el Funnel si se apagó. Si la página deja de abrir, un solo comando revisa todo y lo arregla:
+
+```bash
+bash servidor/reparar.sh   # internet, código, app, Tailscale/Funnel y arranque automático
+```
+
 ### Ejecutar las pruebas
 
 ```powershell
