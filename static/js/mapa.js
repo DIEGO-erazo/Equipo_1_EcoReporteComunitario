@@ -16,6 +16,9 @@
     const mapa = L.map(elemento).setView(centro, zoom);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
+      // OpenStreetMap bloquea los mapas que piden sin decir de qué sitio vienen (Referer).
+      // Django por defecto no lo envía a otros sitios, así que aquí se pide enviar al menos el dominio.
+      referrerPolicy: 'strict-origin-when-cross-origin',
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(mapa);
     return mapa;
