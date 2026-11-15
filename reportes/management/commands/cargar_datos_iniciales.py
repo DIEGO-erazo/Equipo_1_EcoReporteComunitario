@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -72,8 +74,12 @@ class Command(BaseCommand):
         return Usuario.para_cuenta(cuenta)
 
     def _crear_demo(self):
-        admin = self._crear_cuenta('admin@ecoreporte.local', 'Administrador', 'EcoReporte', 'admin12345', True)
-        vecina = self._crear_cuenta('vecina@ecoreporte.local', 'María', 'López', 'vecina12345')
+        # En un servidor público las contraseñas de ejemplo no deben ser las del README:
+        # se cambian con estas variables de entorno (Render las genera solas, ver render.yaml).
+        clave_admin = os.getenv('DEMO_ADMIN_CONTRASENA') or 'admin12345'
+        clave_vecina = os.getenv('DEMO_VECINA_CONTRASENA') or 'vecina12345'
+        admin = self._crear_cuenta('admin@ecoreporte.local', 'Administrador', 'EcoReporte', clave_admin, True)
+        vecina = self._crear_cuenta('vecina@ecoreporte.local', 'María', 'López', clave_vecina)
 
         if not ReporteAmbiental.objects.exists():
             pendiente = Estado.inicial()
@@ -90,6 +96,6 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(
             'Datos de ejemplo listos:\n'
-            '  Administrador: admin@ecoreporte.local / admin12345\n'
-            '  Ciudadana:     vecina@ecoreporte.local / vecina12345'
+            f'  Administrador: admin@ecoreporte.local / {"(la de DEMO_ADMIN_CONTRASENA)" if clave_admin != "admin12345" else clave_admin}\n'
+            f'  Ciudadana:     vecina@ecoreporte.local / {"(la de DEMO_VECINA_CONTRASENA)" if clave_vecina != "vecina12345" else clave_vecina}'
         ))

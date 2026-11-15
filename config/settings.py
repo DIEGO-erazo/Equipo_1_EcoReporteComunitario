@@ -8,6 +8,7 @@ modo debug, base de datos) se leen de variables de entorno o de un archivo
 
 import os
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
@@ -38,6 +39,12 @@ DEBUG = env_bool("DEBUG", True)
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0")
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
+
+# Render publica la dirección del servicio en esta variable: se acepta sin tener que escribirla a mano.
+RENDER_HOST = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if RENDER_HOST:
+    ALLOWED_HOSTS.append(RENDER_HOST)
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_HOST}")
 
 
 # Application definition
@@ -98,10 +105,26 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Base de datos
 # DB_ENGINE=sqlite (por defecto, no requiere instalar nada) o DB_ENGINE=mssql.
+# Si existe DATABASE_URL (así entrega Render su base PostgreSQL) se usa esa y lo demás se ignora.
 
-DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").strip().lower()
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+DB_ENGINE = "postgres" if DATABASE_URL else os.getenv("DB_ENGINE", "sqlite").strip().lower()
 
-if DB_ENGINE == "mssql":
+if DB_ENGINE == "postgres":
+    # postgresql://usuario:contraseña@servidor:puerto/base
+    url = urlparse(DATABASE_URL)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': unquote(url.path.lstrip('/')),
+            'USER': unquote(url.username or ''),
+            'PASSWORD': unquote(url.password or ''),
+            'HOST': url.hostname or '',
+            'PORT': str(url.port or ''),
+            'CONN_MAX_AGE': 60,
+        },
+    }
+elif DB_ENGINE == "mssql":
     DB_USER = os.getenv("DB_USER", "")
     opciones_mssql = {
         'driver': os.getenv("DB_DRIVER", "ODBC Driver 18 for SQL Server"),
@@ -265,7 +288,7 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = env_bool("SECURE_COOKIES", True)
     CSRF_COOKIE_SECURE = env_bool("SECURE_COOKIES", True)
 
-if env_bool("DETRAS_DE_PROXY"):
-    # Cloudflare Tunnel (u otro proxy) recibe la conexión HTTPS y la reenvía
+if env_bool("DETRAS_DE_PROXY") or RENDER_HOST:
+    # Render, Tailscale Funnel (u otro proxy) recibe la conexión HTTPS y la reenvía
     # a gunicorn por HTTP; este encabezado le avisa a Django que era segura.
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

@@ -1,0 +1,36 @@
+# Despliegue de EcoReporte Comunitario en Render (plan gratuito).
+# En render.com: New > Blueprint > elegir este repositorio. Render lee este archivo
+# y crea la base de datos y el servicio web con todo configurado.
+# Pasos y capturas: documentacion/despliegue_render.md
+
+databases:
+  - name: ecoreporte-db
+    plan: free
+    databaseName: ecoreporte
+    user: ecoreporte
+
+services:
+  - type: web
+    name: ecoreporte-comunitario
+    runtime: python
+    plan: free
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ecoreporte-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      # Contraseñas de las cuentas de ejemplo: Render inventa una distinta para cada una.
+      # Se ven en el panel del servicio, pestaña Environment.
+      - key: DEMO_ADMIN_CONTRASENA
+        generateValue: true
+      - key: DEMO_VECINA_CONTRASENA
+        generateValue: true
