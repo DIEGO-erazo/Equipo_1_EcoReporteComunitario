@@ -10,7 +10,7 @@
 
 EcoReporte Comunitario es una aplicación web desarrollada con Python, Django y Microsoft SQL Server, orientada al registro y seguimiento de problemáticas ambientales en la comunidad de San Rafael.
 
-**Aplicación publicada en Render:** _(pega aquí el enlace de Render)_ · guía en [documentacion/despliegue_render.md](documentacion/despliegue_render.md)
+**Aplicación publicada en Render:** https://ecoreporte-comunitario-96tp.onrender.com · guía en [documentacion/despliegue_render.md](documentacion/despliegue_render.md)
 
 El proyecto busca facilitar la comunicación entre habitantes, instituciones educativas y responsables comunitarios mediante una plataforma para organizar información sobre botaderos clandestinos, acumulación de basura y problemas en la recolección de residuos.
 

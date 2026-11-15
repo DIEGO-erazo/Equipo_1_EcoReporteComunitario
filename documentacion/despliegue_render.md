@@ -1,5 +1,7 @@
 # Despliegue en Render
 
+**Aplicación publicada:** https://ecoreporte-comunitario-96tp.onrender.com (desplegada el 15 de noviembre de 2026).
+
 EcoReporte Comunitario se publica en [Render](https://render.com) con el plan gratuito: un servicio web con Django y gunicorn, y una base de datos PostgreSQL. El repositorio ya trae todo lo necesario, así que el despliegue se hace con un *Blueprint* y no hace falta escribir ninguna configuración a mano.
 
 ## Archivos que usa Render
@@ -30,7 +32,7 @@ Render las crea solas a partir de `render.yaml`:
 3. Si Render lo pide, autoriza el acceso al repositorio `DIEGO-erazo/Equipo_1_EcoReporteComunitario` y elígelo.
 4. Render muestra lo que va a crear: `ecoreporte-db` (PostgreSQL) y `ecoreporte-comunitario` (servicio web). Escribe un nombre para el Blueprint y pulsa **Deploy Blueprint**.
 5. Espera a que el servicio pase a **Live**. El primer despliegue tarda de 3 a 6 minutos y se puede seguir en la pestaña **Logs**.
-6. Abre la dirección que aparece arriba del servicio, por ejemplo `https://ecoreporte-comunitario.onrender.com`.
+6. Abre la dirección que aparece arriba del servicio. Render añade letras al nombre si ya está ocupado; la de este proyecto es `https://ecoreporte-comunitario-96tp.onrender.com`.
 7. Para entrar como administrador, abre el servicio, ve a **Environment** y copia el valor de `DEMO_ADMIN_CONTRASENA`. El usuario es `admin@ecoreporte.local`.
 
 Cada `git push` a la rama `main` vuelve a desplegar la aplicación automáticamente.
