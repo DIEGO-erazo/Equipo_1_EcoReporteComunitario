@@ -100,6 +100,12 @@ class ModeloReporteTest(BaseReportesTest):
 
 
 class VistasPublicasTest(BaseReportesTest):
+    def test_favicon_redirige_al_icono(self):
+        # Los navegadores piden /favicon.ico por su cuenta; antes respondía 404.
+        respuesta = self.client.get('/favicon.ico')
+        self.assertEqual(respuesta.status_code, 301)
+        self.assertTrue(respuesta['Location'].endswith('img/hoja.svg'))
+
     def test_inicio_muestra_estadisticas(self):
         self.crear_reporte()
         respuesta = self.client.get(reverse('inicio'))

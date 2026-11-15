@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import admin
+from django.templatetags.static import static
 from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 from django.views.static import serve
@@ -13,6 +14,8 @@ admin.site.index_title = 'Administración'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Los navegadores piden /favicon.ico aunque la página indique otro ícono: se manda al de la hoja.
+    path('favicon.ico', RedirectView.as_view(url=static('img/hoja.svg'), permanent=True)),
     path('', reportes_views.inicio, name='inicio'),
     path('reportes/', include('reportes.urls')),
     path('usuarios/', include('usuarios.urls')),
