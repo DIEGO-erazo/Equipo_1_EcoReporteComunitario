@@ -1,0 +1,18 @@
+{% load interfaz %}
+<form method="get" class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <div class="row g-2">
+      <div class="col-12 col-md-5">
+        <label class="visually-hidden" for="{{ filtro.q.id_for_label }}">Buscar</label>{{ filtro.q|bootstrap }}
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="visually-hidden" for="{{ filtro.categoria.id_for_label }}">Categoría</label>{{ filtro.categoria|bootstrap }}
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="visually-hidden" for="{{ filtro.estado.id_for_label }}">Estado</label>{{ filtro.estado|bootstrap }}
+      </div>
+      <div class="col-12 col-md-2 d-grid"><button type="submit" class="btn btn-primary">Buscar</button></div>
+    </div>
+    {% if request.GET %}<a class="d-inline-block mt-2 small" href="{{ request.path }}">Limpiar filtros</a>{% endif %}
+  </div>
+</form>

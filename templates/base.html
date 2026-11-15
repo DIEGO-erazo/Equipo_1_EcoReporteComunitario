@@ -8,6 +8,7 @@
   {# Bootstrap 5.3.3 va dentro del proyecto para que el sitio funcione sin internet. #}
   <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+  {% block cabecera %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
   {% with seccion=request.resolver_match.namespace pagina_actual=request.resolver_match.url_name %}
@@ -27,7 +28,10 @@
             <a class="nav-link{% if pagina_actual == 'inicio' %} active{% endif %}" href="{% url 'inicio' %}">Inicio</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link{% if seccion == 'reportes' and pagina_actual != 'mis_reportes' %} active{% endif %}" href="{% url 'reportes:lista' %}">Reportes</a>
+            <a class="nav-link{% if seccion == 'reportes' and pagina_actual != 'mis_reportes' and pagina_actual != 'mapa' %} active{% endif %}" href="{% url 'reportes:lista' %}">Reportes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link{% if pagina_actual == 'mapa' %} active{% endif %}" href="{% url 'reportes:mapa' %}">Mapa</a>
           </li>
           {% if user.is_authenticated %}
             <li class="nav-item">
@@ -95,5 +99,6 @@
   </footer>
   <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'js/ver_contrasena.js' %}"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

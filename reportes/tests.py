@@ -1,13 +1,17 @@
 import shutil
+import smtplib
 import tempfile
 from io import BytesIO
+from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from openpyxl import load_workbook
 from PIL import Image
 
 from usuarios.models import Rol, Usuario
@@ -199,3 +203,122 @@ class CambioEstadoTest(BaseReportesTest):
         reporte.refresh_from_db()
         self.assertEqual(reporte.id_estado, self.resuelto)
         self.assertEqual(reporte.seguimientos.get().comentario, 'Listo')
+
+
+class MapaTest(BaseReportesTest):
+    def test_mapa_muestra_solo_reportes_con_coordenadas(self):
+        con_punto = self.crear_reporte(titulo='Con punto', latitud='14.133000', longitud='-89.033000')
+        self.crear_reporte(titulo='Sin punto')
+        respuesta = self.client.get(reverse('reportes:mapa'))
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(respuesta.context['puntos'], [{
+            'titulo': 'Con punto', 'lat': 14.133, 'lng': -89.033, 'estado': 'Pendiente',
+            'clase': 'pendiente', 'categoria': 'Botadero clandestino', 'url': con_punto.get_absolute_url(),
+        }])
+        self.assertEqual(respuesta.context['sin_coordenadas'], 1)
+        self.assertContains(respuesta, 'vendor/leaflet/leaflet.js')
+        self.assertContains(respuesta, 'id="mapa-puntos"')
+
+    def test_mapa_usa_los_mismos_filtros_que_la_lista(self):
+        self.crear_reporte(titulo='Pendiente', latitud='14.1', longitud='-89.0')
+        self.crear_reporte(titulo='Resuelto', latitud='14.2', longitud='-89.1', id_estado=self.resuelto)
+        respuesta = self.client.get(reverse('reportes:mapa'), {'estado': self.resuelto.pk})
+        self.assertEqual([p['titulo'] for p in respuesta.context['puntos']], ['Resuelto'])
+
+    def test_detalle_muestra_el_punto_solo_si_tiene_coordenadas(self):
+        reporte = self.crear_reporte(latitud='14.133000', longitud='-89.033000')
+        self.assertContains(self.client.get(reporte.get_absolute_url()), 'data-mapa-punto')
+        reporte = self.crear_reporte()
+        respuesta = self.client.get(reporte.get_absolute_url())
+        self.assertNotContains(respuesta, 'data-mapa-punto')
+        self.assertNotContains(respuesta, 'leaflet.js')
+
+    def test_formulario_trae_el_selector_de_ubicacion(self):
+        self.ingresar(self.vecino)
+        respuesta = self.client.get(reverse('reportes:crear'))
+        self.assertContains(respuesta, 'id="mapa-elegir"')
+        self.assertContains(respuesta, 'id="mapa-config"')
+
+
+class AvisoPorCorreoTest(BaseReportesTest):
+    def cambiar(self, reporte, comentario='Se coordinó la limpieza'):
+        self.ingresar(self.admin)
+        return self.client.post(reverse('reportes:cambiar_estado', args=[reporte.pk]),
+                                {'nuevo_estado': self.resuelto.pk, 'comentario': comentario}, follow=True)
+
+    def test_avisa_al_autor_cuando_cambia_el_estado(self):
+        reporte = self.crear_reporte()
+        respuesta = self.cambiar(reporte)
+        self.assertEqual(len(mail.outbox), 1)
+        correo = mail.outbox[0]
+        self.assertEqual(correo.to, ['vecino@test.com'])
+        self.assertEqual(correo.subject, 'Tu reporte «Basura en la calle» ahora está: Resuelto')
+        self.assertIn('Antes: Pendiente', correo.body)
+        self.assertIn('Ahora: Resuelto', correo.body)
+        self.assertIn('Se coordinó la limpieza', correo.body)
+        self.assertIn(f'https://testserver{reporte.get_absolute_url()}', correo.body)
+        self.assertContains(respuesta, 'Se avisó por correo a Ana Pérez.')
+
+    def test_no_avisa_si_el_administrador_cambia_su_propio_reporte(self):
+        self.cambiar(self.crear_reporte(usuario=self.admin))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_no_avisa_a_cuentas_sin_correo_real(self):
+        sin_correo = Usuario.para_cuenta(get_user_model().objects.create_user(username='sincorreo', password='x'))
+        self.cambiar(self.crear_reporte(usuario=sin_correo))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_si_falla_el_correo_el_estado_igual_cambia(self):
+        reporte = self.crear_reporte()
+        with mock.patch('reportes.notificaciones.send_mail', side_effect=smtplib.SMTPException('caído')), \
+                self.assertLogs('reportes.notificaciones', 'ERROR'):
+            respuesta = self.cambiar(reporte)
+        reporte.refresh_from_db()
+        self.assertEqual(reporte.id_estado, self.resuelto)
+        self.assertContains(respuesta, 'Estado actualizado a «Resuelto».')
+        self.assertNotContains(respuesta, 'Se avisó por correo')
+
+
+class ExportarTest(BaseReportesTest):
+    def test_solo_administradores_pueden_descargar(self):
+        for nombre in ('reportes:exportar_excel', 'reportes:exportar_pdf'):
+            self.assertEqual(self.client.get(reverse(nombre)).status_code, 302)
+            self.ingresar(self.vecino)
+            self.assertEqual(self.client.get(reverse(nombre)).status_code, 403)
+            self.client.logout()
+
+    def test_excel_con_los_filtros_de_la_lista(self):
+        self.crear_reporte(titulo='=HIPERVINCULO("x")', latitud='14.1345', longitud='-89.03')
+        self.crear_reporte(titulo='Resuelto', id_estado=self.resuelto)
+        self.ingresar(self.admin)
+        respuesta = self.client.get(reverse('reportes:exportar_excel'), {'estado': self.pendiente.pk})
+        self.assertEqual(respuesta['Content-Type'],
+                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        self.assertIn('attachment; filename="reportes_ecoreporte_', respuesta['Content-Disposition'])
+
+        hoja = load_workbook(BytesIO(respuesta.content)).active
+        self.assertEqual(hoja['A2'].value[:17], 'Estado: Pendiente')
+        self.assertEqual(hoja['B4'].value, 'Título')
+        self.assertEqual(hoja.max_row, 5)
+        fila = [celda.value for celda in hoja[5]]
+        self.assertEqual(fila[1:4], ['=HIPERVINCULO("x")', 'Botadero clandestino', 'Pendiente'])
+        self.assertEqual(hoja['B5'].data_type, 's')
+        self.assertEqual(fila[6:10], [14.1345, -89.03, 'Ana Pérez', 'vecino@test.com'])
+
+    def test_pdf(self):
+        self.crear_reporte(titulo='Quebrada contaminada')
+        self.ingresar(self.admin)
+        respuesta = self.client.get(reverse('reportes:exportar_pdf'))
+        self.assertEqual(respuesta['Content-Type'], 'application/pdf')
+        self.assertTrue(respuesta.content.startswith(b'%PDF'))
+
+    def test_pdf_sin_reportes(self):
+        self.ingresar(self.admin)
+        self.assertTrue(self.client.get(reverse('reportes:exportar_pdf')).content.startswith(b'%PDF'))
+
+    def test_boton_de_descarga_solo_para_administradores(self):
+        self.ingresar(self.vecino)
+        self.assertNotContains(self.client.get(reverse('reportes:lista')), 'exportar/excel')
+        self.ingresar(self.admin)
+        self.assertContains(self.client.get(reverse('reportes:lista'), {'q': 'basura'}),
+                            'href="/reportes/exportar/excel/?q=basura"')

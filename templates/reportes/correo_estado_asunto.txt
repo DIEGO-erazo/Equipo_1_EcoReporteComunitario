@@ -1,0 +1,1 @@
+{% autoescape off %}Tu reporte «{{ reporte.titulo }}» ahora está: {{ seguimiento.id_estado_nuevo }}{% endautoescape %}
