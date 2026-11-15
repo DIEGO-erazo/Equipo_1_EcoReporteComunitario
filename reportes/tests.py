@@ -328,3 +328,22 @@ class ExportarTest(BaseReportesTest):
         self.ingresar(self.admin)
         self.assertContains(self.client.get(reverse('reportes:lista'), {'q': 'basura'}),
                             'href="/reportes/exportar/excel/?q=basura"')
+
+
+class DatosDeEjemploTest(TestCase):
+    def test_la_contrasena_de_ejemplo_se_actualiza_desde_la_variable(self):
+        # En el servidor, cambiar la variable y volver a desplegar debe cambiar la contraseña.
+        with mock.patch.dict('os.environ', {'DEMO_ADMIN_CONTRASENA': 'primera-clave-1'}):
+            call_command('cargar_datos_iniciales', demo=True, verbosity=0)
+        with mock.patch.dict('os.environ', {'DEMO_ADMIN_CONTRASENA': 'segunda-clave-2'}):
+            call_command('cargar_datos_iniciales', demo=True, verbosity=0)
+        admin = get_user_model().objects.get(username='admin@ecoreporte.local')
+        self.assertTrue(admin.check_password('segunda-clave-2'))
+        self.assertFalse(admin.check_password('primera-clave-1'))
+
+    def test_sin_variable_se_usa_la_clave_del_readme(self):
+        with mock.patch.dict('os.environ', {}, clear=False):
+            import os
+            os.environ.pop('DEMO_VECINA_CONTRASENA', None)
+            call_command('cargar_datos_iniciales', demo=True, verbosity=0)
+        self.assertTrue(get_user_model().objects.get(username='vecina@ecoreporte.local').check_password('vecina12345'))

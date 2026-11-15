@@ -61,25 +61,29 @@ class Command(BaseCommand):
         if opciones['demo']:
             self._crear_demo()
 
-    def _crear_cuenta(self, correo, nombre, apellido, contrasena, administrador=False):
+    def _crear_cuenta(self, correo, nombre, apellido, contrasena, administrador=False, forzar=False):
+        """Crea la cuenta si no existe. Con forzar=True también le pone esa contraseña si ya existía,
+        para que cambiar la variable de entorno en el servidor surta efecto en el siguiente despliegue."""
         User = get_user_model()
         cuenta, creada = User.objects.get_or_create(
             username=correo,
             defaults={'email': correo, 'first_name': nombre, 'last_name': apellido,
                       'is_staff': administrador, 'is_superuser': administrador},
         )
-        if creada:
+        if creada or (forzar and not cuenta.check_password(contrasena)):
             cuenta.set_password(contrasena)
             cuenta.save()
         return Usuario.para_cuenta(cuenta)
 
     def _crear_demo(self):
         # En un servidor público las contraseñas de ejemplo no deben ser las del README:
-        # se cambian con estas variables de entorno (Render las genera solas, ver render.yaml).
-        clave_admin = os.getenv('DEMO_ADMIN_CONTRASENA') or 'admin12345'
-        clave_vecina = os.getenv('DEMO_VECINA_CONTRASENA') or 'vecina12345'
-        admin = self._crear_cuenta('admin@ecoreporte.local', 'Administrador', 'EcoReporte', clave_admin, True)
-        vecina = self._crear_cuenta('vecina@ecoreporte.local', 'María', 'López', clave_vecina)
+        # se definen con estas variables de entorno (en Render, en Environment).
+        clave_admin = os.getenv('DEMO_ADMIN_CONTRASENA', '').strip()
+        clave_vecina = os.getenv('DEMO_VECINA_CONTRASENA', '').strip()
+        admin = self._crear_cuenta('admin@ecoreporte.local', 'Administrador', 'EcoReporte',
+                                   clave_admin or 'admin12345', True, forzar=bool(clave_admin))
+        vecina = self._crear_cuenta('vecina@ecoreporte.local', 'María', 'López',
+                                    clave_vecina or 'vecina12345', forzar=bool(clave_vecina))
 
         if not ReporteAmbiental.objects.exists():
             pendiente = Estado.inicial()
@@ -96,6 +100,6 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(
             'Datos de ejemplo listos:\n'
-            f'  Administrador: admin@ecoreporte.local / {"(la de DEMO_ADMIN_CONTRASENA)" if clave_admin != "admin12345" else clave_admin}\n'
-            f'  Ciudadana:     vecina@ecoreporte.local / {"(la de DEMO_VECINA_CONTRASENA)" if clave_vecina != "vecina12345" else clave_vecina}'
+            f'  Administrador: admin@ecoreporte.local / {"(la de DEMO_ADMIN_CONTRASENA)" if clave_admin else "admin12345"}\n'
+            f'  Ciudadana:     vecina@ecoreporte.local / {"(la de DEMO_VECINA_CONTRASENA)" if clave_vecina else "vecina12345"}'
         ))
