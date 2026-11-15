@@ -19,6 +19,37 @@ jobs:
       - run: python manage.py makemigrations --check --dry-run
       - run: python manage.py test
 
+  postgres:
+    # La misma base que usa Render.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ecoreporte
+          POSTGRES_DB: ecoreporte
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:ecoreporte@127.0.0.1:5432/ecoreporte
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: sudo apt-get install -y libodbc2
+      - run: pip install -r requirements.txt
+      - name: Preparación igual que en Render
+        run: bash build.sh
+        env:
+          DEBUG: "False"
+          SECRET_KEY: clave-solo-para-las-pruebas-de-github-actions-0123456789
+          RENDER_EXTERNAL_HOSTNAME: ecoreporte-comunitario.onrender.com
+      - run: python manage.py test --noinput
+
   sqlserver:
     runs-on: ubuntu-latest
     services:

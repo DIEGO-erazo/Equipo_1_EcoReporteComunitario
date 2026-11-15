@@ -10,6 +10,8 @@
 
 EcoReporte Comunitario es una aplicación web desarrollada con Python, Django y Microsoft SQL Server, orientada al registro y seguimiento de problemáticas ambientales en la comunidad de San Rafael.
 
+**Aplicación publicada en Render:** _(pega aquí el enlace de Render)_ · guía en [documentacion/despliegue_render.md](documentacion/despliegue_render.md)
+
 El proyecto busca facilitar la comunicación entre habitantes, instituciones educativas y responsables comunitarios mediante una plataforma para organizar información sobre botaderos clandestinos, acumulación de basura y problemas en la recolección de residuos.
 
 ## 2. Objetivos
@@ -40,10 +42,12 @@ Desarrollar una aplicación web que facilite el registro, consulta y seguimiento
 
 - Python 3.12 o superior
 - Django 6.1
-- Microsoft SQL Server (también funciona con SQLite para pruebas rápidas)
+- Microsoft SQL Server (también funciona con SQLite para pruebas rápidas y con PostgreSQL en Render)
 - `mssql-django` y `mssql-python` (este último ya incluye el ODBC Driver 18)
 - Docker y Docker Compose (opcional, para levantar todos los servicios con un solo comando)
 - Git y GitHub (con pruebas automáticas en GitHub Actions)
+- Render (publicación: gunicorn, WhiteNoise y PostgreSQL)
+- Leaflet y OpenStreetMap (mapa), openpyxl y ReportLab (Excel y PDF)
 
 ## 5. Estructura del repositorio
 
@@ -178,7 +182,13 @@ Se crean con `--demo` (y automáticamente con las opciones A y B):
 Es opcional. Cada botón aparece al poner las credenciales de su proveedor en el `.env`.
 Los pasos para obtenerlas están en [documentacion/inicio_sesion_social.md](documentacion/inicio_sesion_social.md).
 
-### Opción D: publicarla en internet desde una computadora con Ubuntu
+### Opción D: publicarla en Render
+
+El repositorio trae `render.yaml` y `build.sh`. En [render.com](https://render.com): **New ▸ Blueprint**, eliges este repositorio y pulsas **Deploy Blueprint**. Render crea la base de datos PostgreSQL y el servicio web con todo configurado.
+
+En Render, las contraseñas de las cuentas de ejemplo no son las de la tabla de abajo: Render las genera y se ven en **Environment** (`DEMO_ADMIN_CONTRASENA`, `DEMO_VECINA_CONTRASENA`). Pasos, pruebas y limitaciones del plan gratuito: [documentacion/despliegue_render.md](documentacion/despliegue_render.md).
+
+### Opción E: publicarla en internet desde una computadora con Ubuntu
 
 Convierte una laptop (por ejemplo, una de las entregadas por el gobierno) en el servidor de la página.
 Usa SQLite, gunicorn y **Cloudflare Tunnel**, que da una dirección `https://` pública gratis sin
@@ -220,7 +230,7 @@ bash servidor/reparar.sh   # internet, código, app, Tailscale/Funnel y arranque
 python manage.py test
 ```
 
-Las pruebas se ejecutan automáticamente en GitHub Actions con SQLite y con SQL Server en cada `push`.
+Las pruebas se ejecutan automáticamente en GitHub Actions con SQLite, con SQL Server y con PostgreSQL (la base de Render) en cada `push`.
 
 ## 8. Programación orientada a objetos
 
@@ -274,9 +284,18 @@ El archivo `.gitignore` debe excluir el entorno virtual, archivos temporales, ba
 
 ## 12. Estado del proyecto
 
-La aplicación es funcional: registro e inicio de sesión, gestión completa de reportes con fotos, búsqueda y filtros, seguimiento de estados por parte de los administradores y panel de administración, con pruebas automáticas.
+Proyecto terminado (semana 8). La aplicación incluye:
 
-Posibles mejoras futuras: mapa interactivo de reportes, notificaciones por correo al cambiar el estado y exportación de reportes a Excel o PDF.
+- Registro e inicio de sesión, también con Google, GitHub o Microsoft, y recuperación de contraseña por correo.
+- Gestión completa de reportes con fotos, búsqueda y filtros.
+- Mapa interactivo con los reportes y selector de ubicación al crear uno.
+- Seguimiento de estados por los administradores, con aviso por correo al autor del reporte.
+- Descarga de los reportes en Excel o PDF.
+- Panel de gestión de categorías, estados y usuarios.
+- 63 pruebas automáticas.
+- Publicación en Render y en el servidor propio del equipo.
+
+Mejoras futuras posibles: guardar las fotos en un almacenamiento externo para que no se pierdan en Render, una aplicación móvil y estadísticas por zona.
 
 ## 13. Información académica
 
