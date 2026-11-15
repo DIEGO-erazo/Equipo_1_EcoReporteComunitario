@@ -293,7 +293,7 @@ Proyecto terminado (semana 8). La aplicación incluye:
 - Descarga de los reportes en Excel o PDF.
 - Panel de gestión de categorías, estados y usuarios.
 - 63 pruebas automáticas.
-- Publicación en Render y en el servidor propio del equipo.
+- Publicación en Render: https://ecoreporte-comunitario-96tp.onrender.com
 
 Mejoras futuras posibles: guardar las fotos en un almacenamiento externo para que no se pierdan en Render, una aplicación móvil y estadísticas por zona.
 

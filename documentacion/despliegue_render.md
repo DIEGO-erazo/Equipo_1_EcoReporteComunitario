@@ -65,7 +65,6 @@ GitHub Actions también ejecuta las pruebas sobre PostgreSQL en cada cambio (`.g
 | El disco del servicio no es permanente | Las fotos de evidencia subidas se pierden al volver a desplegar o reiniciar | Para uso real, guardar las fotos en un almacenamiento externo o en un disco de Render de pago. Los reportes y su historial sí quedan en PostgreSQL |
 | Sin correo configurado | Los avisos solo aparecen en los Logs | Ver «Correo (opcional)» |
 
-El servidor propio del equipo (Ubuntu con Tailscale Funnel, ver el README) sigue funcionando en paralelo y no tiene estas limitaciones.
 
 ## Problemas posibles
 
